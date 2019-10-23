@@ -18,6 +18,7 @@ void printHelp(){
     printf("-rx: Path to the Rx Pipe\n");
     printf("-tx: Path to the Tx Pipe\n");
     printf("-txfb: Path to the Tx Feedback Pipe (required if -tx is present)\n");
+    printf("-blocklen: The block length (in samples)\n");
     printf("-txtokens: The number of initial Tx tokens (in blocks).  Tokens are replenished via the feedback pipe\n");
     printf("-processlimit: The maximum number of blocks to process at one time\n");
     printf("-cpu: CPU to run this application on\n");

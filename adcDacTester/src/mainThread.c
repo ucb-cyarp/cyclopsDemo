@@ -32,6 +32,7 @@ void* mainThread(void* uncastArgs){
             perror(NULL);
             exit(1);
         }
+        printf("Opened Rx Pipe: %s, FD: %d\n", rxPipeName, fileno(rxPipe));
     }
 
     if(txPipeName != NULL){
@@ -41,6 +42,7 @@ void* mainThread(void* uncastArgs){
             perror(NULL);
             exit(1);
         }
+        printf("Opened Tx Pipe: %s, FD: %d\n", txPipeName, fileno(txPipe));
 
         txFeedbackPipe = fopen(txFeedbackPipeName, "rb");
         if(txFeedbackPipe == NULL) {
@@ -48,6 +50,7 @@ void* mainThread(void* uncastArgs){
             perror(NULL);
             exit(1);
         }
+        printf("Opened Tx Feedback Pipe: %s, FD: %d\n", txFeedbackPipeName, fileno(txFeedbackPipe));
     }
 
     //If transmitting, allocate arrays and form a Tx packet
@@ -83,7 +86,6 @@ void* mainThread(void* uncastArgs){
             }
 
             for(int i = 0; i<maxBlocksToProcess; i++) {
-                //Check for feedback (use select)
                 bool feedbackReady = isReadyForReading(txFeedbackPipe);
                 if(feedbackReady){
                     //Get feedback
@@ -116,7 +118,7 @@ void* mainThread(void* uncastArgs){
             //Read and print
             int readCount = 0;
             for(int readAttempts = 0; readAttempts<maxBlocksToProcess; readAttempts++){
-                bool rxReady = isReadyForReading(txFeedbackPipe);
+                bool rxReady = isReadyForReading(rxPipe);
                 if(rxReady) {
                     int samplesRead = fread(rxSampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, rxPipe);
                     if (samplesRead != blockLen && feof(rxPipe)) {

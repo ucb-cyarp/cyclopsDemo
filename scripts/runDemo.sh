@@ -5,7 +5,7 @@ RxSrc=rx_combined_man_partition_fewerLuts_demo_fastslim1_fast1_slow1
 TxSrc=transmitter_man_partition_fewerLuts_demo_fastslim1_fast1_slow1
 cyclopsASCIIDir=~/git/cyclopsASCIILink
 uhdToPipesDir=~/git/uhdToPipes
-BlockSize=16
+BlockSize=100
 
 appCPU=1
 TxTokens=10
@@ -35,22 +35,26 @@ cd demoRun
 #Start vitis generated code
 mkdir rx
 cd rx
-${RxDir}/benchmark_rx_demo_io_linux_pipe > out.txt &
+${RxDir}/benchmark_rx_demo_io_linux_pipe &
 RX_PID=$!
-RX_CMD="${RxDir}/benchmark_rx_demo_io_linux_pipe > out.txt &"
+RX_CMD="${RxDir}/benchmark_rx_demo_io_linux_pipe &"
 echo "[${RX_PID}] ${RX_CMD}"
 cd ..
 mkdir tx
 cd tx
-${TxDir}/benchmark_tx_demo_io_linux_pipe > out.txt &
+${TxDir}/benchmark_tx_demo_io_linux_pipe &
 TX_PID=$!
-TX_CMD="${TxDir}/benchmark_tx_demo_io_linux_pipe > out.txt &"
+TX_CMD="${TxDir}/benchmark_tx_demo_io_linux_pipe &"
 echo "[${TX_PID}] ${TX_CMD}"
 cd ..
 
 #Create Feeback Pipe for the Application Layer Side
 TxFeedbkAppPipeName="txFeedbkAppLayer.pipe"
 mkfifo ${TxFeedbkAppPipeName}
+echo "mkfifo ${TxFeedbkAppPipeName}"
+
+echo "Waiting 5 Seconds for DSP to Start"
+sleep 5
 
 #Start cyclopsASCII (before the ADC/DAC)
 #Feedback backpressure will prevent a runaway
@@ -60,9 +64,9 @@ CYCLOPSASCII_CMD="${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ./${vitisFromRxPi
 echo "[${CYCLOPSASCII_PID}] ${CYCLOPSASCII_CMD}"
 
 #Start uhdToPipes
-${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ${vitisFromADCPipe} --txpipe ${vitisToDACPipe} --txfeedbackpipe ${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer > uhd.out &
+${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ./${vitisFromADCPipe} --txpipe ./${vitisToDACPipe} --txfeedbackpipe ./${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer &
 UHDTOPIPES_PID=$!
-UDDTOPIPES_CMD="${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ${vitisFromADCPipe} --txpipe ${vitisToDACPipe} --txfeedbackpipe ${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer > uhd.out &"
+UDDTOPIPES_CMD="${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ./${vitisFromADCPipe} --txpipe ./${vitisToDACPipe} --txfeedbackpipe ./${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer &"
 echo "[${UHDTOPIPES_PID}] ${UDDTOPIPES_CMD}"
 
 echo "Waiting for RX Proc to Exit"

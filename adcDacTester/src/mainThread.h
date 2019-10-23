@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define FEEDBACK_DATATYPE uint32_t
+#define FEEDBACK_DATATYPE int32_t
 #define SAMPLE_COMPONENT_DATATYPE float
 
 #define SAMPLE_COMPONENT_INIT_VAL (0)

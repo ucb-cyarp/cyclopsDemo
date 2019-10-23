@@ -53,6 +53,8 @@ void* mainThread(void* uncastArgs){
         printf("Opened Tx Feedback Pipe: %s, FD: %d\n", txFeedbackPipeName, fileno(txFeedbackPipe));
     }
 
+    printf("Block Size: %d Samples\n", blockLen);
+
     //If transmitting, allocate arrays and form a Tx packet
     SAMPLE_COMPONENT_DATATYPE* txSampBuffer;
     if(txPipe != NULL){
@@ -66,7 +68,6 @@ void* mainThread(void* uncastArgs){
     //Rx State
     SAMPLE_COMPONENT_DATATYPE* rxSampBuffer;
     if(rxPipe != NULL){
-        //Craft a packet to send
         rxSampBuffer = (SAMPLE_COMPONENT_DATATYPE*) malloc(sizeof(SAMPLE_COMPONENT_DATATYPE)*2*blockLen);
     }
 
@@ -79,6 +80,7 @@ void* mainThread(void* uncastArgs){
             for(int i = 0; i<numBlocksToSend; i++){
                 fwrite(txSampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE)*2, blockLen, txPipe);
             }
+            fflush(txPipe);
             txTokens -=numBlocksToSend;
 
             if(print && numBlocksToSend > 0){

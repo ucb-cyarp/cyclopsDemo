@@ -3,6 +3,7 @@
 //
 
 #include "helpers.h"
+#include <stdio.h>
 #include <sys/select.h>
 #include <sys/time.h>
 #include <stdlib.h>
@@ -18,16 +19,15 @@ bool isReadyForReading(FILE* file){
     int maxFD = fileFD;
 
     //Timeout quickly
-    struct timeval timeout;
+    struct timespec timeout;
     timeout.tv_sec = 0;
-    timeout.tv_usec = 0;
+    timeout.tv_nsec = 0;
 
-    int selectStatus = select(maxFD, &fdSet, NULL, NULL, &timeout);
+    int selectStatus = pselect(maxFD+1, &fdSet, NULL, NULL, &timeout, NULL);
     if(selectStatus == -1){
         fprintf(stderr, "Error while checking if a file is ready for reading\n");
         perror(NULL);
         exit(1);
     }
-
     return FD_ISSET(fileFD, &fdSet);
 }

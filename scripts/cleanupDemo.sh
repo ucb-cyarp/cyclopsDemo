@@ -7,6 +7,7 @@ pkill -f uhdToPipes
 pkill -f benchmark_tx_demo_io_linux_pipe
 pkill -f benchmark_rx_demo_io_linux_pipe
 pkill -f cyclopsASCIILink
+pkill -f dummyAdcDac
 
 cd demoRun
 rm *.pipe

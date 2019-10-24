@@ -50,7 +50,7 @@ void* mainThread(void* uncastArgs){
     bool running = true;
     while(running){
         //Get samples from rx pipe (ok to block)
-        int samplesRead = fread(sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, rxPipe);
+        int samplesRead = fread(sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, txPipe);
         if (samplesRead != blockLen && feof(rxPipe)) {
             //Done!
             running = false;
@@ -65,9 +65,11 @@ void* mainThread(void* uncastArgs){
         }
 
         //Write samples to tx pipe (ok to block)
-        fwrite(sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, txPipe);
+        fwrite(sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, rxPipe);
+        fflush(rxPipe);
         FEEDBACK_DATATYPE tokensReturned = 1;
         fwrite(&tokensReturned, sizeof(tokensReturned), 1, txFeedbackPipe);
+        fflush(txFeedbackPipe);
     }
 
     if(rxPipe != NULL){

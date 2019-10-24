@@ -20,4 +20,6 @@ typedef struct{
     bool print;
 } threadArgs_t;
 
+void* mainThread(void* uncastArgs);
+
 #endif //DUMMYADCDAC_MAINTHREAD_H

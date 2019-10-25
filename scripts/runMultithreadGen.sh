@@ -6,7 +6,15 @@ cyclopsASCIIDir=~/git/cyclopsASCIILink
 curDir=`pwd`
 
 ./runRxMultithreadGen.sh ${RxSrc}
+if [ $? -ne 0 ]; then
+        echo "Gen Failed for Rx"
+        exit 1
+fi
 ./runTxMultithreadGen.sh ${TxSrc}
+if [ $? -ne 0 ]; then
+        echo "Gen Failed for Tx"
+        exit 1
+fi
 
 #Copy required headers into cyclopsASCII
 cp cOut_${RxSrc}/*_io_linux_pipe.h ${cyclopsASCIIDir}/src/vitisIncludes/.
@@ -24,6 +32,14 @@ cd ${cyclopsASCIIDir}
 mkdir build
 cd build
 cmake ..
+if [ $? -ne 0 ]; then
+        echo "cmake Failed for cyclopsASCII"
+        exit 1
+fi
 make
+if [ $? -ne 0 ]; then
+        echo "make Failed for cyclopsASCII"
+        exit 1
+fi
 
 cd ${curDir}

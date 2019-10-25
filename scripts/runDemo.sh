@@ -6,7 +6,7 @@ TxSrc=transmitter_man_partition_fewerLuts_demo_fastslim1_fast1_slow1
 cyclopsASCIIDir=~/git/cyclopsASCIILink
 uhdToPipesDir=~/git/uhdToPipes
 dummyAdcDacDir=~/git/cyclopsDemo/dummyAdcDac
-BlockSize=1000
+BlockSize=64
 
 appCPU=1
 TxTokens=10
@@ -19,11 +19,11 @@ vitisToDACPipe="tx/output_bundle_2.pipe"
 
 txCPU=16
 rxCPU=17
-usrpArgs="addr=192.168.10.2"
+usrpArgs="addr=192.168.40.2"
 Freq=5800000000
-Rate=500000
-TxGainDB=30
-RxGainDB=30
+Rate=1000000
+TxGainDB=20
+RxGainDB=15
 txChan=0
 rxChan=1
 
@@ -67,17 +67,19 @@ CYCLOPSASCII_PID=$!
 CYCLOPSASCII_CMD="${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ./${vitisFromRxPipe} -tx ./${vitisToTxPipe} -txfb ./${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} &"
 echo "[${CYCLOPSASCII_PID}] ${CYCLOPSASCII_CMD}"
 
-#Start uhdToPipes
-${dummyAdcDacBuildDir}/dummyAdcDac -cpu ${txCPU} -rx ./${vitisFromADCPipe} -tx ./${vitisToDACPipe} -txfb ./${TxFeedbkAppPipeName} -blocklen ${BlockSize} &
-DUMMYADCDAC_PID=$!
-DUMMYADCDAC_CMD="${dummyAdcDacBuildDir}/dummyAdcDac -cpu ${txCPU} -rx ./${vitisFromADCPipe} -tx ./${vitisToDACPipe} -txfb ./${TxFeedbkAppPipeName} -blocklen ${BlockSize} &"
-echo "[${DUMMYADCDAC_PID}] ${DUMMYADCDAC_CMD}"
+#Start dummyAdcDac
+# ${dummyAdcDacBuildDir}/dummyAdcDac -cpu ${txCPU} -rx ./${vitisFromADCPipe} -tx ./${vitisToDACPipe} -txfb ./${TxFeedbkAppPipeName} -blocklen ${BlockSize} -gain 0.001 &
+# DUMMYADCDAC_PID=$!
+# DUMMYADCDAC_CMD="${dummyAdcDacBuildDir}/dummyAdcDac -cpu ${txCPU} -rx ./${vitisFromADCPipe} -tx ./${vitisToDACPipe} -txfb ./${TxFeedbkAppPipeName} -blocklen ${BlockSize} -gain 0.001 &"
+# echo "[${DUMMYADCDAC_PID}] ${DUMMYADCDAC_CMD}"
 
 # #Start uhdToPipes
+${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ./${vitisFromADCPipe} --txpipe ./${vitisToDACPipe} --txfeedbackpipe ./${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer --txchan ${txChan} --rxchan ${rxChan} &
 # ${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ./${vitisFromADCPipe} --txpipe ./${vitisToDACPipe} --txfeedbackpipe ./${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer --txchan ${txChan} --rxchan ${rxChan} --txratelimit &
-# UHDTOPIPES_PID=$!
+UHDTOPIPES_PID=$!
+UDDTOPIPES_CMD="${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ./${vitisFromADCPipe} --txpipe ./${vitisToDACPipe} --txfeedbackpipe ./${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer --txchan ${txChan} --rxchan ${rxChan} &"
 # UDDTOPIPES_CMD="${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ./${vitisFromADCPipe} --txpipe ./${vitisToDACPipe} --txfeedbackpipe ./${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer --txchan ${txChan} --rxchan ${rxChan} --txratelimit &"
-# echo "[${UHDTOPIPES_PID}] ${UDDTOPIPES_CMD}"
+echo "[${UHDTOPIPES_PID}] ${UDDTOPIPES_CMD}"
 
 echo "Waiting for RX Proc to Exit"
 wait ${RX_PID}
@@ -85,10 +87,10 @@ echo "Waiting for TX Proc to Exit"
 wait ${TX_PID}
 echo "Waiting for CYCLOPS Proc to Exit"
 wait ${CYCLOPSASCII_PID}
-echo "Waiting for DUMMYADCDAC Proc to Exit"
-wait ${DUMMYADCDAC_PID}
-# echo "Waiting for UHDTOPIPES Proc to Exit"
-# wait ${UHDTOPIPES_PID}
+# echo "Waiting for DUMMYADCDAC Proc to Exit"
+# wait ${DUMMYADCDAC_PID}
+echo "Waiting for UHDTOPIPES Proc to Exit"
+wait ${UHDTOPIPES_PID}
 
 echo "Procs Exited"
 

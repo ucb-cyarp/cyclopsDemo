@@ -13,6 +13,7 @@ void* mainThread(void* uncastArgs){
     char *txPipeName = args->txPipeName;
     char *txFeedbackPipeName = args->txFeedbackPipeName;
     char *rxPipeName = args->rxPipeName;
+    float gain = args->gain;
 
     int32_t blockLen = args->blockLen;
     bool print = args->print;
@@ -62,6 +63,12 @@ void* mainThread(void* uncastArgs){
         } else if (samplesRead != blockLen) {
             printf("An unknown error was encountered while reading the Rx pipe\n");
             exit(1);
+        }
+
+        if(gain !=0){
+            for(int i = 0; i<blockLen*2; i++){
+                sampBuffer[i] *= gain;
+            }
         }
 
         //Write samples to tx pipe (ok to block)

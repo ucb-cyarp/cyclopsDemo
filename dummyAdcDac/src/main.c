@@ -19,7 +19,7 @@ void printHelp(){
     printf("-tx: Path to the Tx Pipe\n");
     printf("-txfb: Path to the Tx Feedback Pipe (required if -tx is present)\n");
     printf("-blocklen: Block length in samples\n");
-
+    printf("-gain: Gain of the ADC/DAC\n");
     printf("-cpu: CPU to run this application on\n");
     printf("-v: verbose\n");
 }
@@ -32,6 +32,8 @@ int main(int argc, char **argv) {
 
     int32_t blockLen = 1;
     bool print;
+
+    float gain = 1;
 
     int cpu = -1;
 
@@ -79,6 +81,18 @@ int main(int argc, char **argv) {
                 printf("Missing argument for -blocklen\n");
                 exit(1);
             }
+        } else if (strcmp("-gain", argv[i]) == 0) {
+            i++; //Get the actual argument
+
+            if (i < argc) {
+                gain = strtof(argv[i], NULL);
+                if (blockLen <= 1) {
+                    printf("-gain must be positive\n");
+                }
+            } else {
+                printf("Missing argument for -gain\n");
+                exit(1);
+            }
         } else if (strcmp("-cpu", argv[i]) == 0) {
             i++; //Get the actual argument
 
@@ -108,6 +122,7 @@ int main(int argc, char **argv) {
     threadArgs.txPipeName = txPipeName;
     threadArgs.txFeedbackPipeName = txFeedbackPipeName;
     threadArgs.rxPipeName = rxPipeName;
+    threadArgs.gain = gain;
 
     threadArgs.blockLen = blockLen;
     threadArgs.print = print;

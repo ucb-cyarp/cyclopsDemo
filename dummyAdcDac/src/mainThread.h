@@ -15,6 +15,7 @@ typedef struct{
     char *txPipeName;
     char *txFeedbackPipeName;
     char *rxPipeName;
+    float gain;
 
     int32_t blockLen;
     bool print;

@@ -16,13 +16,13 @@ void* mainThread(void* uncastArgs){
     threadArgs_t* args = (threadArgs_t*) uncastArgs;
     char *txPipeName = args->txPipeName;
     char *rxPipeName = args->rxPipeName;
+    int flushPeriod = args->flushPeriod;
 
     int32_t blockLen = args->blockLen;
 
     //Open Pipes (if applicable)
     FILE *rxPipe = NULL;
     FILE *txPipe = NULL;
-    FILE *txFeedbackPipe = NULL;
 
     if(rxPipeName != NULL) {
         rxPipe = fopen(rxPipeName, "rb");
@@ -46,7 +46,6 @@ void* mainThread(void* uncastArgs){
     SAMPLE_COMPONENT_DATATYPE* sampBuffer = (SAMPLE_COMPONENT_DATATYPE*) malloc(sizeof(SAMPLE_COMPONENT_DATATYPE)*2*blockLen);
 
     int flushCounter = 0;
-    int flushPeriod = 1;
 
     int samplesRecv = 0;
     int samplesSent = 0;

@@ -14,6 +14,8 @@ typedef struct{
     char *txPipeName;
     char *rxPipeName;
 
+    int flushPeriod;
+
     int32_t blockLen;
 } threadArgs_t;
 

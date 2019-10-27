@@ -18,6 +18,7 @@ void printHelp(){
     printf("-rx: Path to the Rx Pipe\n");
     printf("-tx: Path to the Tx Pipe\n");
     printf("-blocklen: Block length in samples\n");
+    printf("-flushperiod: The flush period\n");
     printf("-cpu: CPU to run this application on\n");
     printf("-v: verbose\n");
 }
@@ -29,6 +30,7 @@ int main(int argc, char **argv) {
     char *rxPipeName = NULL;
 
     int32_t blockLen = 1;
+    int flushPeriod
 
     int cpu = -1;
 
@@ -67,6 +69,18 @@ int main(int argc, char **argv) {
                 printf("Missing argument for -blocklen\n");
                 exit(1);
             }
+        } else if (strcmp("-flushperiod", argv[i]) == 0) {
+            i++; //Get the actual argument
+
+            if (i < argc) {
+                flushPeriod = strtol(argv[i], NULL, 10);
+                if (blockLen <= 0) {
+                    printf("-flushPeriod must be non-negative\n");
+                }
+            } else {
+                printf("Missing argument for -flushPeriod\n");
+                exit(1);
+            }
         }  else if (strcmp("-cpu", argv[i]) == 0) {
             i++; //Get the actual argument
 
@@ -95,6 +109,7 @@ int main(int argc, char **argv) {
     threadArgs.rxPipeName = rxPipeName;
 
     threadArgs.blockLen = blockLen;
+    threadArgs.flushPeriod = flushPeriod;
 
     //Create Thread
     cpu_set_t cpuset_app;

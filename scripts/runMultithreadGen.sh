@@ -1,16 +1,18 @@
 #!/bin/bash
 RxSrc=rx_combined_man_partition_fewerLuts_demo_fastslim1_fast1_slow1
 TxSrc=transmitter_man_partition_fewerLuts_demo_fastslim1_fast1_slow1
+BlockSize=32
+
 cyclopsASCIIDir=~/git/cyclopsASCIILink
 
 curDir=`pwd`
 
-./runRxMultithreadGen.sh ${RxSrc}
+./runRxMultithreadGen.sh ${RxSrc} ${BlockSize}
 if [ $? -ne 0 ]; then
         echo "Gen Failed for Rx"
         exit 1
 fi
-./runTxMultithreadGen.sh ${TxSrc}
+./runTxMultithreadGen.sh ${TxSrc} ${BlockSize}
 if [ $? -ne 0 ]; then
         echo "Gen Failed for Tx"
         exit 1

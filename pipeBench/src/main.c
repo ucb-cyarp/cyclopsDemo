@@ -93,8 +93,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (txPipeName == NULL || txFeedbackPipeName == NULL || rxPipeName == NULL) {
-        printf("must supply tx, rx, and txfb pipes\n");
+    if (txPipeName == NULL && rxPipeName == NULL) {
+        printf("must supply tx or pipes\n");
         exit(1);
     }
 

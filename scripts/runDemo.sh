@@ -8,7 +8,11 @@ uhdToPipesDir=~/git/uhdToPipes
 dummyAdcDacDir=~/git/cyclopsDemo/dummyAdcDac
 BlockSize=32
 
-USE_DUMMY=1
+if [ -z $1 ]; then
+    USE_DUMMY=0
+else
+    USE_DUMMY=$1
+fi
 
 appCPU=1
 TxTokens=10

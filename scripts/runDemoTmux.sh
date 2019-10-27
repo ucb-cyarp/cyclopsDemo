@@ -9,7 +9,11 @@ uhdToPipesDir=~/git/uhdToPipes
 dummyAdcDacDir=~/git/cyclopsDemo/dummyAdcDac
 BlockSize=32
 
-USE_DUMMY=0
+if [ -z $1 ]; then
+    USE_DUMMY=0
+else
+    USE_DUMMY=$1
+fi
 
 appCPU=1
 TxTokens=10
@@ -48,14 +52,15 @@ cd demoRun
 #Start vitis generated code
 mkdir rx
 cd rx
-tmux new-session -d -s vitis_cyclopse_demo "${RxDir}/benchmark_rx_demo_io_linux_pipe"
+tmux new-session -d -s vitis_cyclopse_demo "printf '\\033]2;%s\\033\\\\' 'Rx_DSP'; ${RxDir}/benchmark_rx_demo_io_linux_pipe"
 tmux rename-window -t vitis_cyclopse_demo:0 'vitis_cyclopse_demo'
+tmux set-option -t vitis_cyclopse_demo pane-border-status top
 
 echo "${RxDir}/benchmark_rx_demo_io_linux_pipe"
 cd ..
 mkdir tx
 cd tx
-tmux split-window -h -d -t vitis_cyclopse_demo:0 "${TxDir}/benchmark_tx_demo_io_linux_pipe"
+tmux split-window -h -d -t vitis_cyclopse_demo:0 "printf '\\033]2;%s\\033\\\\' 'Tx_DSP'; ${TxDir}/benchmark_tx_demo_io_linux_pipe"
 # tmux rename-window -t vitis_cyclopse_demo:1 'tx'
 echo "${TxDir}/benchmark_tx_demo_io_linux_pipe"
 cd ..
@@ -70,19 +75,19 @@ sleep 5
 
 #Start cyclopsASCII (before the ADC/DAC)
 #Feedback backpressure will prevent a runaway
-tmux split-window -v -d -t vitis_cyclopse_demo:0 "${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ./${vitisFromRxPipe} -tx ./${vitisToTxPipe} -txfb ./${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU}"
+tmux split-window -v -d -t vitis_cyclopse_demo:0 "printf '\\033]2;%s\\033\\\\' 'Cyclops_ASCII_Application'; ${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ./${vitisFromRxPipe} -tx ./${vitisToTxPipe} -txfb ./${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU}"
 # tmux rename-window -t vitis_cyclopse_demo:2 'cyclopsASCII'
 echo "${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ./${vitisFromRxPipe} -tx ./${vitisToTxPipe} -txfb ./${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU}"
 
 if [ ${USE_DUMMY} -ne 0 ]; then
     #Start dummyAdcDac
-    tmux split-window -v -d -t vitis_cyclopse_demo:0.2 "${dummyAdcDacBuildDir}/dummyAdcDac -cpu ${txCPU} -rx ./${vitisFromADCPipe} -tx ./${vitisToDACPipe} -txfb ./${TxFeedbkAppPipeName} -blocklen ${BlockSize}"
+    tmux split-window -v -d -t vitis_cyclopse_demo:0.2 "printf '\\033]2;%s\\033\\\\' 'Dummy_DAC/DAC'; ${dummyAdcDacBuildDir}/dummyAdcDac -cpu ${txCPU} -rx ./${vitisFromADCPipe} -tx ./${vitisToDACPipe} -txfb ./${TxFeedbkAppPipeName} -blocklen ${BlockSize}"
     # tmux rename-window -t vitis_cyclopse_demo:3 'dummyAdcDac'
     echo "${dummyAdcDacBuildDir}/dummyAdcDac -cpu ${txCPU} -rx ./${vitisFromADCPipe} -tx ./${vitisToDACPipe} -txfb ./${TxFeedbkAppPipeName} -blocklen ${BlockSize}"
 else
     # #Start uhdToPipes
     # ${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ./${vitisFromADCPipe} --txpipe ./${vitisToDACPipe} --txfeedbackpipe ./${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer --txchan ${txChan} --rxchan ${rxChan} &
-    tmux split-window -v -d -t vitis_cyclopse_demo:0.2 "module load uhd; ${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ./${vitisFromADCPipe} --txpipe ./${vitisToDACPipe} --txfeedbackpipe ./${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer --txchan ${txChan} --rxchan ${rxChan} --txratelimit"
+    tmux split-window -v -d -t vitis_cyclopse_demo:0.2 "printf '\\033]2;%s\\033\\\\' 'UHD/USRP'; module load uhd; ${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ./${vitisFromADCPipe} --txpipe ./${vitisToDACPipe} --txfeedbackpipe ./${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer --txchan ${txChan} --rxchan ${rxChan} --txratelimit"
     # tmux rename-window -t vitis_cyclopse_demo:3 'uhdToPipes'
     # UDDTOPIPES_CMD="${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ./${vitisFromADCPipe} --txpipe ./${vitisToDACPipe} --txfeedbackpipe ./${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer --txchan ${txChan} --rxchan ${rxChan} &"
     echo "${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ./${vitisFromADCPipe} --txpipe ./${vitisToDACPipe} --txfeedbackpipe ./${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer --txchan ${txChan} --rxchan ${rxChan} --txratelimit"
@@ -90,4 +95,8 @@ fi
 
 cd ${curDir}
 
-tmux attach-session -t vitis_cyclopse_demo
+if [ -z ${TMUX} ]; then
+    tmux attach-session -t vitis_cyclopse_demo
+else
+    echo "Use TMUX to switch to the new session: vitis_cyclopse_demo"
+fi

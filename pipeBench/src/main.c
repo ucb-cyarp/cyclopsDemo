@@ -76,19 +76,7 @@ int main(int argc, char **argv) {
                 printf("Missing argument for -blocklen\n");
                 exit(1);
             }
-        } else if (strcmp("-gain", argv[i]) == 0) {
-            i++; //Get the actual argument
-
-            if (i < argc) {
-                gain = strtof(argv[i], NULL);
-                if (blockLen <= 1) {
-                    printf("-gain must be positive\n");
-                }
-            } else {
-                printf("Missing argument for -gain\n");
-                exit(1);
-            }
-        } else if (strcmp("-cpu", argv[i]) == 0) {
+        }  else if (strcmp("-cpu", argv[i]) == 0) {
             i++; //Get the actual argument
 
             if (i < argc) {
@@ -100,8 +88,6 @@ int main(int argc, char **argv) {
                 printf("Missing argument for -cpu\n");
                 exit(1);
             }
-        } else if (strcmp("-v", argv[i]) == 0) {
-            print = true;
         } else {
             printf("Unknown CLI option: %s\n", argv[i]);
         }
@@ -115,12 +101,9 @@ int main(int argc, char **argv) {
     //Create Thread Args
     threadArgs_t threadArgs;
     threadArgs.txPipeName = txPipeName;
-    threadArgs.txFeedbackPipeName = txFeedbackPipeName;
     threadArgs.rxPipeName = rxPipeName;
-    threadArgs.gain = gain;
 
     threadArgs.blockLen = blockLen;
-    threadArgs.print = print;
 
     //Create Thread
     cpu_set_t cpuset_app;

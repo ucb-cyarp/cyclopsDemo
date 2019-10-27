@@ -55,15 +55,6 @@ int main(int argc, char **argv) {
                 printf("Missing argument for -tx\n");
                 exit(1);
             }
-        } else if (strcmp("-txfb", argv[i]) == 0) {
-            i++; //Get the actual argument
-
-            if (i < argc) {
-                txFeedbackPipeName = argv[i];
-            } else {
-                printf("Missing argument for -txfb\n");
-                exit(1);
-            }
         } else if (strcmp("-blocklen", argv[i]) == 0) {
             i++; //Get the actual argument
 

@@ -24,18 +24,22 @@ void* mainThread(void* uncastArgs){
     FILE *txPipe = NULL;
     FILE *txFeedbackPipe = NULL;
 
-    rxPipe= fopen(rxPipeName, "wb");
-    if(rxPipe == NULL) {
-        printf("Unable to open Rx Pipe ... exiting\n");
-        perror(NULL);
-        exit(1);
+    if(rxPipeName != NULL) {
+        rxPipe = fopen(rxPipeName, "wb");
+        if (rxPipe == NULL) {
+            printf("Unable to open Rx Pipe ... exiting\n");
+            perror(NULL);
+            exit(1);
+        }
     }
 
-    txPipe = fopen(txPipeName, "rb");
-    if(txPipe == NULL){
-        printf("Unable to open Tx Pipe ... exiting\n");
-        perror(NULL);
-        exit(1);
+    if(txPipeName != NULL) {
+        txPipe = fopen(txPipeName, "rb");
+        if (txPipe == NULL) {
+            printf("Unable to open Tx Pipe ... exiting\n");
+            perror(NULL);
+            exit(1);
+        }
     }
 
     //If transmitting, allocate arrays and form a Tx packet

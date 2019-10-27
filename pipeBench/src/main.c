@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
     char *rxPipeName = NULL;
 
     int32_t blockLen = 1;
-    int flushPeriod
+    int flushPeriod = 0;
 
     int cpu = -1;
 

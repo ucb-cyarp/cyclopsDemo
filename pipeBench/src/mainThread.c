@@ -47,8 +47,8 @@ void* mainThread(void* uncastArgs){
 
     int flushCounter = 0;
 
-    int samplesRecv = 0;
-    int samplesSent = 0;
+    uint64_t samplesRecv = 0;
+    uint64_t samplesSent = 0;
 
     time_t recvStartTime;
     time_t sendStartTime;

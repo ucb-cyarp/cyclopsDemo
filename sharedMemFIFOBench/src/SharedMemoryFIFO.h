@@ -2,8 +2,8 @@
 // Created by Christopher Yarp on 10/28/19.
 //
 
-#ifndef SHAREDMEMFIFOBENCH_HELPERS_H
-#define SHAREDMEMFIFOBENCH_HELPERS_H
+#ifndef SHAREDMEMFIFOBENCH_SHAREDMEMORYFIFO_H
+#define SHAREDMEMFIFOBENCH_SHAREDMEMORYFIFO_H
 
 #include <stdatomic.h>
 #include <semaphore.h>
@@ -20,4 +20,4 @@ int write_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentO
 
 int read_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentOffset, void* dst, volatile void* src, size_t elementSize, int numElements);
 
-#endif //SHAREDMEMFIFOBENCH_HELPERS_H
+#endif //SHAREDMEMFIFOBENCH_SHAREDMEMORYFIFO_H

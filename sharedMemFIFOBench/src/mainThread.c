@@ -13,7 +13,7 @@
 #include <stdatomic.h>
 #include <unistd.h>
 
-#include "helpers.h"
+#include "SharedMemoryFIFO.h"
 
 #define TIME_DURATION (1.0)
 

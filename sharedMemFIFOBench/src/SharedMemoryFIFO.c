@@ -2,7 +2,7 @@
 // Created by Christopher Yarp on 10/28/19.
 //
 
-#include "helpers.h"
+#include "SharedMemoryFIFO.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>

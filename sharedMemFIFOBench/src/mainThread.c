@@ -37,9 +37,8 @@ void* mainThread(void* uncastArgs){
     atomic_int_fast32_t* rxFifoCount = NULL;
     atomic_int_fast32_t* txFifoCount = NULL;
 
-    void* fifoBlock = NULL;
-
-    void* fifoBuffer = NULL;
+    volatile void* fifoBlock = NULL;
+    volatile void* fifoBuffer = NULL;
 
     size_t fifoBufferSizeBytes = SAMPLE_SIZE*fifoSizeBlocks*blockLen;
     size_t fifoBlockSizeBytes = fifoBufferSizeBytes + sizeof(atomic_int_fast32_t);

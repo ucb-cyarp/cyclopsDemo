@@ -149,7 +149,7 @@ int consumerOpenFIFOBlock(char *sharedName, int *rxSharedFD, char** txSemaphoreN
 //fifoCount is in bytes
 
 //returns number of elements written
-int write_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentOffset, void* dst_uncast, void* src_uncast, size_t elementSize, int numElements){
+int write_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentOffset, volatile void* dst_uncast, void* src_uncast, size_t elementSize, int numElements){
     char* dst = (char*) dst_uncast;
     char* src = (char*) src_uncast;
 
@@ -201,7 +201,7 @@ int write_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentO
     return numElements;
 }
 
-int read_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentOffset, void* dst_uncast, void* src_uncast, size_t elementSize, int numElements){
+int read_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentOffset, void* dst_uncast, volatile void* src_uncast, size_t elementSize, int numElements){
     char* dst = (char*) dst_uncast;
     char* src = (char*) src_uncast;
 

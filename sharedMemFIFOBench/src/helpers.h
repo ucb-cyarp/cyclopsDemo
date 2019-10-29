@@ -16,8 +16,8 @@ int consumerOpenFIFOBlock(char *sharedName, int *rxSharedFD, char** txSemaphoreN
 
 
 //NOTE: this function blocks until numElements can be written into the FIFO
-int write_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentOffset, void* dst, void* src, size_t elementSize, int numElements);
+int write_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentOffset, volatile void* dst, void* src, size_t elementSize, int numElements);
 
-int read_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentOffset, void* dst, void* src, size_t elementSize, int numElements);
+int read_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentOffset, void* dst, volatile void* src, size_t elementSize, int numElements);
 
 #endif //SHAREDMEMFIFOBENCH_HELPERS_H

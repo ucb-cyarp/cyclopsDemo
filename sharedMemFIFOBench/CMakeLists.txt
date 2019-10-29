@@ -13,6 +13,9 @@ endif()
 
 find_package(Threads)
 find_library(LIBRT rt)
+if(NOT LIBRT)
+    message(FATAL_ERROR "librt not found")
+endif()
 
 set(CMAKE_C_STANDARD 11)
 
@@ -23,4 +26,4 @@ set(COMMON_SRCS
         src/helpers.h)
 
 add_executable(sharedMemFIFOBench src/main.c ${COMMON_SRCS})
-target_link_libraries(sharedMemFIFOBench ${CMAKE_THREAD_LIBS_INIT} ${LIB_RT})
+target_link_libraries(sharedMemFIFOBench ${CMAKE_THREAD_LIBS_INIT} ${LIBRT})

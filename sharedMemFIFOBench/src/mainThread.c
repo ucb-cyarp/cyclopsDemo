@@ -37,21 +37,20 @@ void* mainThread(void* uncastArgs){
     atomic_int_fast32_t* rxFifoCount = NULL;
     atomic_int_fast32_t* txFifoCount = NULL;
 
-    void* rxFifoBlock = NULL;
-    void* txFifoBlock = NULL;
+    void* fifoBlock = NULL;
 
-    void* rxFifoBuffer = NULL;
-    void* txFifoBuffer = NULL;
+    void* fifoBuffer = NULL;
 
     size_t fifoBufferSizeBytes = SAMPLE_SIZE*fifoSizeBlocks*blockLen;
     size_t fifoBlockSizeBytes = fifoBufferSizeBytes + sizeof(atomic_int_fast32_t);
 
     if(txSharedName != NULL) {
-        producerOpenInitFIFO(txSharedName, &txSharedFD, &txSemaphoreName, &txSem, &txFifoCount, &txFifoBlock, &txFifoBuffer, fifoBufferSizeBytes);
+        producerOpenInitFIFOBlock(txSharedName, &txSharedFD, &txSemaphoreName, &rxSemaphoreName, &txSem, &rxSem, &txFifoCount, &fifoBlock,
+                                  &fifoBuffer, fifoBufferSizeBytes);
     }
 
     if(rxSharedName != NULL) {
-        consumerOpenFIFOBlock(rxSharedName, &rxSharedFD, &rxSemaphoreName, &rxSem, &rxFifoCount, &rxFifoBlock, &rxFifoBuffer, fifoBufferSizeBytes);
+        consumerOpenFIFOBlock(rxSharedName, &rxSharedFD, &txSemaphoreName, &rxSemaphoreName, &txSem, &rxSem, &rxFifoCount, &fifoBlock, &fifoBuffer, fifoBufferSizeBytes);
     }
 
     //If transmitting, allocate arrays and form a Tx packet
@@ -76,10 +75,10 @@ void* mainThread(void* uncastArgs){
     SAMPLE_COMPONENT_DATATYPE txFifoExpectedVal = 0;
 
     while(running){
-        if(rxFifoBuffer != NULL) {
+        if(rxSharedName != NULL) {
             //Get samples from rx pipe (ok to block)
 
-            int samplesRead = read_fifo(fifoBufferSizeBytes, rxFifoCount, &rxCurrentOffset, sampBuffer, rxFifoBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen);
+            int samplesRead = read_fifo(fifoBufferSizeBytes, rxFifoCount, &rxCurrentOffset, sampBuffer, fifoBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen);
             if(samplesRecv == 0){
                 recvStartTime = time(NULL);
                 lastRecvPrint = recvStartTime;
@@ -113,7 +112,7 @@ void* mainThread(void* uncastArgs){
             rxFifoExpectedVal += 1;
         }
 
-        if(txFifoBuffer != NULL) {
+        if(txSharedName != NULL) {
 
             //TODO: comment out for accurate speed
             for(int i = 0; i<blockLen; i++){
@@ -123,7 +122,7 @@ void* mainThread(void* uncastArgs){
             txFifoExpectedVal += 1;
 
             //Write samples to tx pipe (ok to block)
-            write_fifo(fifoBufferSizeBytes, txFifoCount, &txCurrentOffset, txFifoBuffer, sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen);
+            write_fifo(fifoBufferSizeBytes, txFifoCount, &txCurrentOffset, fifoBuffer, sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen);
             if(samplesSent == 0){
                 sendStartTime = time(NULL);
             }
@@ -140,23 +139,31 @@ void* mainThread(void* uncastArgs){
         }
     }
 
+    //Both Tx and Rx need to do this
+    int status = munmap(fifoBlock, fifoBlockSizeBytes);
+    if(status == -1){
+        printf("Error in tx munmap\n");
+        perror(NULL);
+    }
+
+    status = sem_close(txSem);
+    if(status == -1){
+        printf("Error in tx semaphore close\n");
+        perror(NULL);
+    }
+
+    status = sem_close(rxSem);
+    if(status == -1){
+        printf("Error in rx semaphore close\n");
+        perror(NULL);
+    }
+
     if(txSem != NULL){
-        int status = munmap(txFifoBlock, fifoBlockSizeBytes);
-        if(status == -1){
-            printf("Error in tx munmap\n");
-            perror(NULL);
-        }
+        //Producer is responsible for unlinking semaphore too
 
         status = shm_unlink(txSharedName);
         if(status == -1){
             printf("Error in tx fifo unlink\n");
-            perror(NULL);
-        }
-
-        //Producer is responsible for unlinking semaphore too
-        status = sem_close(txSem);
-        if(status == -1){
-            printf("Error in tx semaphore close\n");
             perror(NULL);
         }
 
@@ -165,18 +172,10 @@ void* mainThread(void* uncastArgs){
             printf("Error in tx semaphore unlink\n");
             perror(NULL);
         }
-    }
 
-    if(rxSem != NULL){
-        int status = munmap(rxFifoBlock, fifoBlockSizeBytes);
+        status = sem_unlink(rxSemaphoreName);
         if(status == -1){
-            printf("Error in rx munmap\n");
-            perror(NULL);
-        }
-
-        status = sem_close(rxSem);
-        if(status == -1){
-            printf("Error in rx semaphore close\n");
+            printf("Error in rx semaphore unlink\n");
             perror(NULL);
         }
     }

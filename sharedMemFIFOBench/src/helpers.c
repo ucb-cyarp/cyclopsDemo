@@ -9,16 +9,18 @@
 #include <string.h>
 #include <fcntl.h>
 
-int producerOpenInitFIFO(char *txSharedName, int *txSharedFD, char** txSemaphoreName, sem_t **txSem, atomic_int_fast32_t** txFifoCount, void** txFifoBlock, void** txFifoBuffer, size_t fifoSizeBytes){
+int producerOpenInitFIFOBlock(char *sharedName, int *txSharedFD, char** txSemaphoreName, char** rxSemaphoreName, sem_t **txSem, sem_t **rxSem, atomic_int_fast32_t** txFifoCount, void** txFifoBlock, void** txFifoBuffer, size_t fifoSizeBytes){
     size_t sharedBlockSize = fifoSizeBytes + sizeof(atomic_int_fast32_t);
 
-    //The producer is responsible for initializing the FIFO and releasing the semaphore
+    //The producer is responsible for initializing the FIFO and releasing the Tx semaphore
     //Note: Both Tx and Rx use the O_CREAT mode to create the semaphore if it does not already exist
+    //The Rx semaphore is used to block the producer from continuing after FIFO init until a consumer is started and is ready
     //---- Get access to the semaphore ----
-    int txSharedNameLen = strlen(txSharedName);
-    *txSemaphoreName = malloc(txSharedNameLen+2);
+    int sharedNameLen = strlen(sharedName);
+    *txSemaphoreName = malloc(sharedNameLen+5);
     strcpy(*txSemaphoreName, "/");
-    strcat(*txSemaphoreName, txSharedName);
+    strcat(*txSemaphoreName, sharedName);
+    strcat(*txSemaphoreName, "_TX");
     *txSem = sem_open(*txSemaphoreName, O_CREAT, S_IRWXU, 0); //Initialize to 0, the consumer will wait
     if (*txSem == SEM_FAILED){
         printf("Unable to open tx semaphore\n");
@@ -26,8 +28,19 @@ int producerOpenInitFIFO(char *txSharedName, int *txSharedFD, char** txSemaphore
         exit(1);
     }
 
+    *rxSemaphoreName = malloc(sharedNameLen+5);
+    strcpy(*txSemaphoreName, "/");
+    strcat(*txSemaphoreName, sharedName);
+    strcat(*txSemaphoreName, "_RX");
+    *txSem = sem_open(*txSemaphoreName, O_CREAT, S_IRWXU, 0); //Initialize to 0, the consumer will wait
+    if (*txSem == SEM_FAILED){
+        printf("Unable to open rx semaphore\n");
+        perror(NULL);
+        exit(1);
+    }
+
     //---- Init shared mem ----
-    *txSharedFD = shm_open(txSharedName, O_CREAT | O_RDWR, S_IRWXU);
+    *txSharedFD = shm_open(sharedName, O_CREAT | O_RDWR, S_IRWXU);
     if (*txSharedFD == -1){
         printf("Unable to open tx shm\n");
         perror(NULL);
@@ -60,34 +73,49 @@ int producerOpenInitFIFO(char *txSharedName, int *txSharedFD, char** txSemaphore
     //---- Release the semaphore ----
     sem_post(*txSem);
 
+    //---- Wait for consumer to join ---
+    sem_wait(*rxSem);
+
     return sharedBlockSize;
 }
 
-int consumerOpenFIFOBlock(char *rxSharedName, int *rxSharedFD, char** rxSemaphoreName, sem_t **rxSem, atomic_int_fast32_t** rxFifoCount, void** rxFifoBlock, void** rxFifoBuffer, size_t fifoSizeBytes){
+int consumerOpenFIFOBlock(char *sharedName, int *rxSharedFD, char** txSemaphoreName, char** rxSemaphoreName, sem_t **txSem, sem_t **rxSem, atomic_int_fast32_t** rxFifoCount, void** rxFifoBlock, void** rxFifoBuffer, size_t fifoSizeBytes){
     size_t sharedBlockSize = fifoSizeBytes + sizeof(atomic_int_fast32_t);
 
     //---- Get access to the semaphore ----
-    int rxSharedNameLen = strlen(rxSharedName);
-    *rxSemaphoreName = malloc(rxSharedNameLen+2);
-    strcpy(*rxSemaphoreName, "/");
-    strcat(*rxSemaphoreName, rxSharedName);
-    *rxSem = sem_open(*rxSemaphoreName, O_CREAT, S_IRWXU, 0); //Initialize to 0, the consumer waits
-    if(*rxSem == SEM_FAILED){
+    int sharedNameLen = strlen(sharedName);
+    *txSemaphoreName = malloc(sharedNameLen+5);
+    strcpy(*txSemaphoreName, "/");
+    strcat(*txSemaphoreName, sharedName);
+    strcat(*txSemaphoreName, "_TX");
+    *txSem = sem_open(*txSemaphoreName, O_CREAT, S_IRWXU, 0); //Initialize to 0, the consumer will wait
+    if (*txSem == SEM_FAILED){
+        printf("Unable to open tx semaphore\n");
+        perror(NULL);
+        exit(1);
+    }
+
+    *rxSemaphoreName = malloc(sharedNameLen+5);
+    strcpy(*txSemaphoreName, "/");
+    strcat(*txSemaphoreName, sharedName);
+    strcat(*txSemaphoreName, "_RX");
+    *txSem = sem_open(*txSemaphoreName, O_CREAT, S_IRWXU, 0); //Initialize to 0, the consumer will wait
+    if (*txSem == SEM_FAILED){
         printf("Unable to open rx semaphore\n");
         perror(NULL);
         exit(1);
     }
 
     //Block on the semaphore while the producer is initializing
-    int status = sem_wait(*rxSem);
+    int status = sem_wait(*txSem);
     if(status == -1){
-        printf("Unable to wait on rx semaphore\n");
+        printf("Unable to wait on tx semaphore\n");
         perror(NULL);
         exit(1);
     }
 
     //---- Open shared mem ----
-    *rxSharedFD = shm_open(rxSharedName, O_RDWR, S_IRWXU);
+    *rxSharedFD = shm_open(sharedName, O_RDWR, S_IRWXU);
     if(*rxSharedFD == -1){
         printf("Unable to open rx shm\n");
         perror(NULL);
@@ -103,11 +131,14 @@ int consumerOpenFIFOBlock(char *rxSharedName, int *rxSharedFD, char** rxSemaphor
         exit(1);
     }
 
-    //---- Init the fifoCount ----
+    //---- Get appropriate pointers from the shared memory block ----
     *rxFifoCount = (atomic_int_fast32_t*) *rxFifoBlock;
 
     char* rxFifoBlockBytes = (char*) *rxFifoBlock;
     *rxFifoBuffer = (void*) (rxFifoBlockBytes + sizeof(atomic_int_fast32_t));
+
+    //inform producer that consumer is ready
+    sem_post(*rxSem);
 
     return sharedBlockSize;
 }

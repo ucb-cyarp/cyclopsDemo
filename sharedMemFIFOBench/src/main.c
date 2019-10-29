@@ -123,8 +123,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (txSharedName == NULL && rxSharedName == NULL) {
-        printf("must supply tx or rx pipes\n");
+    if ((txSharedName == NULL && rxSharedName == NULL) || (txSharedName != NULL && rxSharedName != NULL) ) {
+        printf("Exactly one -tx or -rx argument must be supplied\n");
         exit(1);
     }
 

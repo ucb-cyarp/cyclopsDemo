@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
 
     sharedName = argv[1];
 
-    int status = shm_unlink(txSharedName);
+    int status = shm_unlink(sharedName);
     if(status == -1){
         printf("Error in fifo block unlink\n");
         perror(NULL);

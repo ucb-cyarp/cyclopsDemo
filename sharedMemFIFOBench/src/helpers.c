@@ -9,7 +9,7 @@
 #include <string.h>
 #include <fcntl.h>
 
-int producerOpenInitFIFOBlock(char *sharedName, int *txSharedFD, char** txSemaphoreName, char** rxSemaphoreName, sem_t **txSem, sem_t **rxSem, atomic_int_fast32_t** txFifoCount, void** txFifoBlock, void** txFifoBuffer, size_t fifoSizeBytes){
+int producerOpenInitFIFOBlock(char *sharedName, int *txSharedFD, char** txSemaphoreName, char** rxSemaphoreName, sem_t **txSem, sem_t **rxSem, atomic_int_fast32_t** txFifoCount, volatile void** txFifoBlock, volatile void** txFifoBuffer, size_t fifoSizeBytes){
     size_t sharedBlockSize = fifoSizeBytes + sizeof(atomic_int_fast32_t);
 
     //The producer is responsible for initializing the FIFO and releasing the Tx semaphore
@@ -79,7 +79,7 @@ int producerOpenInitFIFOBlock(char *sharedName, int *txSharedFD, char** txSemaph
     return sharedBlockSize;
 }
 
-int consumerOpenFIFOBlock(char *sharedName, int *rxSharedFD, char** txSemaphoreName, char** rxSemaphoreName, sem_t **txSem, sem_t **rxSem, atomic_int_fast32_t** rxFifoCount, void** rxFifoBlock, void** rxFifoBuffer, size_t fifoSizeBytes){
+int consumerOpenFIFOBlock(char *sharedName, int *rxSharedFD, char** txSemaphoreName, char** rxSemaphoreName, sem_t **txSem, sem_t **rxSem, atomic_int_fast32_t** rxFifoCount, volatile void** rxFifoBlock, volatile void** rxFifoBuffer, size_t fifoSizeBytes){
     size_t sharedBlockSize = fifoSizeBytes + sizeof(atomic_int_fast32_t);
 
     //---- Get access to the semaphore ----

@@ -275,8 +275,9 @@ int read_fifo(void* dst_uncast, size_t elementSize, int numElements, sharedMemor
 }
 
 void cleanupHelper(sharedMemoryFIFO_t *fifo){
+    void* fifoBlockCast = (void *) fifo->fifoBlock;
     if(fifo->fifoBlock != NULL) {
-        int status = munmap(fifo->fifoBlock, fifo->fifoSharedBlockSizeBytes);
+        int status = munmap(fifoBlockCast, fifo->fifoSharedBlockSizeBytes);
         if (status == -1) {
             printf("Error in tx munmap\n");
             perror(NULL);
@@ -324,7 +325,7 @@ void cleanupProducer(sharedMemoryFIFO_t *fifo){
     }
 
     if(unlinkRxSem) {
-        int status = sem_unlink(fifo->rxSemaphoreName;
+        int status = sem_unlink(fifo->rxSemaphoreName);
         if (status == -1) {
             printf("Error in rx semaphore unlink\n");
             perror(NULL);

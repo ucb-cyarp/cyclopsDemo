@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 /**
  * This program is used to demonstrate the use of the shared memory interface for a FIFO.
  * It uses 2 POSIX concepts: shared memory, and semaphores.

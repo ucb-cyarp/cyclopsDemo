@@ -123,7 +123,7 @@ void* mainThread(void* uncastArgs){
             txFifoExpectedVal += 1;
 
             //Write samples to tx pipe (ok to block)
-            write_fifo(fifoBufferSizeBytes, txFifoCount, txCurrentOffset, txFifoBuffer, sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen);
+            write_fifo(fifoBufferSizeBytes, txFifoCount, &txCurrentOffset, txFifoBuffer, sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen);
             if(samplesSent == 0){
                 sendStartTime = time(NULL);
             }

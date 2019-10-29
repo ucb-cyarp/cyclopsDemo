@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 
 int producerOpenInitFIFO(char *txSharedName, int *txSharedFD, char** txSemaphoreName, sem_t **txSem, atomic_int_fast32_t** txFifoCount, void** txFifoBlock, void** txFifoBuffer, size_t fifoSizeBytes){
     size_t sharedBlockSize = fifoSizeBytes + sizeof(atomic_int_fast32_t);

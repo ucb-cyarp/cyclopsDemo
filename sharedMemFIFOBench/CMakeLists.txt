@@ -22,8 +22,8 @@ set(CMAKE_C_STANDARD 11)
 set(COMMON_SRCS
         src/mainThread.c
         src/mainThread.h
-        src/SharedMemoryFIFO.c
-        src/SharedMemoryFIFO.h)
+        src/depends/BerkeleySharedMemoryFIFO.c
+        src/depends/BerkeleySharedMemoryFIFO.h)
 
 add_executable(sharedMemFIFOBench src/main.c ${COMMON_SRCS})
 target_link_libraries(sharedMemFIFOBench ${CMAKE_THREAD_LIBS_INIT} ${LIBRT})

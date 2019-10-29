@@ -13,5 +13,4 @@ set(COMMON_SRCS
         src/helpers.h)
 
 add_executable(sharedMemFIFOBench src/main.c ${COMMON_SRCS})
-target_link_libraries(sharedMemFIFOBench ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(sharedMemFIFOBench ${LIB_RT})
+target_link_libraries(sharedMemFIFOBench ${CMAKE_THREAD_LIBS_INIT} ${LIB_RT})

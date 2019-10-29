@@ -24,32 +24,20 @@ void* mainThread(void* uncastArgs){
     size_t fifoSizeBlocks = args->fifoSizeBlocks;
     int32_t blockLen = args->blockLen;
 
-    //Open shared memory (if applicable)
-    int rxSharedFD = -1;
-    int txSharedFD = -1;
+    //Open shared memory
 
-    sem_t *rxSem = NULL;
-    sem_t *txSem = NULL;
-
-    char* rxSemaphoreName = NULL;
-    char* txSemaphoreName = NULL;
-
-    atomic_int_fast32_t* rxFifoCount = NULL;
-    atomic_int_fast32_t* txFifoCount = NULL;
-
-    volatile void* fifoBlock = NULL;
-    volatile void* fifoBuffer = NULL;
+    sharedMemoryFIFO_t sharedMemoryFifo;
+    initSharedMemoryFIFO(&sharedMemoryFifo);
 
     size_t fifoBufferSizeBytes = SAMPLE_SIZE*fifoSizeBlocks*blockLen;
     size_t fifoBlockSizeBytes = fifoBufferSizeBytes + sizeof(atomic_int_fast32_t);
 
     if(txSharedName != NULL) {
-        producerOpenInitFIFOBlock(txSharedName, &txSharedFD, &txSemaphoreName, &rxSemaphoreName, &txSem, &rxSem, &txFifoCount, &fifoBlock,
-                                  &fifoBuffer, fifoBufferSizeBytes);
+        producerOpenInitFIFOBlock(txSharedName, fifoBufferSizeBytes, &sharedMemoryFifo);
     }
 
     if(rxSharedName != NULL) {
-        consumerOpenFIFOBlock(rxSharedName, &rxSharedFD, &txSemaphoreName, &rxSemaphoreName, &txSem, &rxSem, &rxFifoCount, &fifoBlock, &fifoBuffer, fifoBufferSizeBytes);
+        consumerOpenFIFOBlock(rxSharedName, fifoBufferSizeBytes, &sharedMemoryFifo);
     }
 
     //If transmitting, allocate arrays and form a Tx packet
@@ -67,9 +55,6 @@ void* mainThread(void* uncastArgs){
     //Main Loop
     bool running = true;
 
-    size_t rxCurrentOffset = 0;
-    size_t txCurrentOffset = 0;
-
     SAMPLE_COMPONENT_DATATYPE rxFifoExpectedVal = 0;
     SAMPLE_COMPONENT_DATATYPE txFifoExpectedVal = 0;
 
@@ -77,7 +62,7 @@ void* mainThread(void* uncastArgs){
         if(rxSharedName != NULL) {
             //Get samples from rx pipe (ok to block)
 
-            int samplesRead = read_fifo(fifoBufferSizeBytes, rxFifoCount, &rxCurrentOffset, sampBuffer, fifoBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen);
+            int samplesRead = readFifo( sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, &sharedMemoryFifo);
             if(samplesRecv == 0){
                 recvStartTime = time(NULL);
                 lastRecvPrint = recvStartTime;
@@ -121,7 +106,7 @@ void* mainThread(void* uncastArgs){
             txFifoExpectedVal += 1;
 
             //Write samples to tx pipe (ok to block)
-            write_fifo(fifoBufferSizeBytes, txFifoCount, &txCurrentOffset, fifoBuffer, sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen);
+            writeFifo(sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, &sharedMemoryFifo);
             if(samplesSent == 0){
                 sendStartTime = time(NULL);
             }
@@ -138,53 +123,10 @@ void* mainThread(void* uncastArgs){
         }
     }
 
-    //Both Tx and Rx need to do this
-    int status = munmap(fifoBlock, fifoBlockSizeBytes);
-    if(status == -1){
-        printf("Error in tx munmap\n");
-        perror(NULL);
-    }
-
-    status = sem_close(txSem);
-    if(status == -1){
-        printf("Error in tx semaphore close\n");
-        perror(NULL);
-    }
-
-    status = sem_close(rxSem);
-    if(status == -1){
-        printf("Error in rx semaphore close\n");
-        perror(NULL);
-    }
-
-    if(txSem != NULL){
-        //Producer is responsible for unlinking semaphore too
-
-        status = shm_unlink(txSharedName);
-        if(status == -1){
-            printf("Error in tx fifo unlink\n");
-            perror(NULL);
-        }
-
-        status = sem_unlink(txSemaphoreName);
-        if(status == -1){
-            printf("Error in tx semaphore unlink\n");
-            perror(NULL);
-        }
-
-        status = sem_unlink(rxSemaphoreName);
-        if(status == -1){
-            printf("Error in rx semaphore unlink\n");
-            perror(NULL);
-        }
-    }
-
-    if(txSemaphoreName != NULL){
-        free(txSemaphoreName);
-    }
-
-    if(rxSemaphoreName != NULL){
-        free(rxSemaphoreName);
+    if(txSharedName != NULL){
+        cleanupProducer(&sharedMemoryFifo);
+    }else if(rxSharedName != NULL){
+        cleanupConsumer(&sharedMemoryFifo);
     }
 
     free(sampBuffer);

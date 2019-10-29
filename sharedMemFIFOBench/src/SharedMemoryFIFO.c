@@ -9,105 +9,126 @@
 #include <string.h>
 #include <fcntl.h>
 
-int producerOpenInitFIFOBlock(char *sharedName, int *txSharedFD, char** txSemaphoreName, char** rxSemaphoreName, sem_t **txSem, sem_t **rxSem, atomic_int_fast32_t** txFifoCount, volatile void** txFifoBlock, volatile void** txFifoBuffer, size_t fifoSizeBytes){
+void initSharedMemoryFIFO(sharedMemoryFIFO_t *fifo){
+    fifo->sharedName = NULL;
+    fifo->sharedFD = -1;
+    fifo->txSemaphoreName = NULL;
+    fifo->rxSemaphoreName = NULL;
+    fifo->txSem = NULL;
+    fifo->rxSem = NULL;
+    fifo->fifoCount = NULL;
+    fifo->fifoBlock = NULL;
+    fifo->fifoBuffer = NULL;
+    fifo->fifoSizeBytes = 0;
+    fifo->currentOffset = 0;
+    fifo->fifoSharedBlockSizeBytes = 0;
+}
+
+int producerOpenInitFIFOBlock(char *sharedName, size_t fifoSizeBytes, sharedMemoryFIFO_t *fifo){
+    fifo->sharedName = sharedName;
+    fifo->fifoSizeBytes = fifoSizeBytes;
     size_t sharedBlockSize = fifoSizeBytes + sizeof(atomic_int_fast32_t);
+    fifo->fifoSharedBlockSizeBytes = sharedBlockSize;
 
     //The producer is responsible for initializing the FIFO and releasing the Tx semaphore
     //Note: Both Tx and Rx use the O_CREAT mode to create the semaphore if it does not already exist
     //The Rx semaphore is used to block the producer from continuing after FIFO init until a consumer is started and is ready
     //---- Get access to the semaphore ----
     int sharedNameLen = strlen(sharedName);
-    *txSemaphoreName = malloc(sharedNameLen+5);
-    strcpy(*txSemaphoreName, "/");
-    strcat(*txSemaphoreName, sharedName);
-    strcat(*txSemaphoreName, "_TX");
-    *txSem = sem_open(*txSemaphoreName, O_CREAT, S_IRWXU, 0); //Initialize to 0, the consumer will wait
-    if (*txSem == SEM_FAILED){
+    fifo->txSemaphoreName = malloc(sharedNameLen+5);
+    strcpy(fifo->txSemaphoreName, "/");
+    strcat(fifo->txSemaphoreName, sharedName);
+    strcat(fifo->txSemaphoreName, "_TX");
+    fifo->txSem = sem_open(fifo->txSemaphoreName, O_CREAT, S_IRWXU, 0); //Initialize to 0, the consumer will wait
+    if (fifo->txSem == SEM_FAILED){
         printf("Unable to open tx semaphore\n");
         perror(NULL);
         exit(1);
     }
 
-    *rxSemaphoreName = malloc(sharedNameLen+5);
-    strcpy(*rxSemaphoreName, "/");
-    strcat(*rxSemaphoreName, sharedName);
-    strcat(*rxSemaphoreName, "_RX");
-    *rxSem = sem_open(*rxSemaphoreName, O_CREAT, S_IRWXU, 0); //Initialize to 0, the consumer will wait
-    if (*rxSem == SEM_FAILED){
+    fifo->rxSemaphoreName = malloc(sharedNameLen+5);
+    strcpy(fifo->rxSemaphoreName, "/");
+    strcat(fifo->rxSemaphoreName, sharedName);
+    strcat(fifo->rxSemaphoreName, "_RX");
+    fifo->rxSem = sem_open(fifo->rxSemaphoreName, O_CREAT, S_IRWXU, 0); //Initialize to 0, the consumer will wait
+    if (fifo->rxSem == SEM_FAILED){
         printf("Unable to open rx semaphore\n");
         perror(NULL);
         exit(1);
     }
 
     //---- Init shared mem ----
-    *txSharedFD = shm_open(sharedName, O_CREAT | O_RDWR, S_IRWXU);
-    if (*txSharedFD == -1){
+    fifo->sharedFD = shm_open(sharedName, O_CREAT | O_RDWR, S_IRWXU);
+    if (fifo->sharedFD == -1){
         printf("Unable to open tx shm\n");
         perror(NULL);
         exit(1);
     }
 
     //Resize the shared memory
-    int status = ftruncate(*txSharedFD, sharedBlockSize);
+    int status = ftruncate(fifo->sharedFD, sharedBlockSize);
     if(status == -1){
         printf("Unable to resize tx fifo\n");
         perror(NULL);
         exit(1);
     }
 
-    *txFifoBlock = mmap(NULL, sharedBlockSize, PROT_READ | PROT_WRITE, MAP_SHARED, *txSharedFD, 0);
-    if (*txFifoBlock == MAP_FAILED){
+    fifo->fifoBlock = mmap(NULL, sharedBlockSize, PROT_READ | PROT_WRITE, MAP_SHARED, fifo->sharedFD, 0);
+    if (fifo->fifoBlock == MAP_FAILED){
         printf("Rx mmap failed\n");
         perror(NULL);
         exit(1);
     }
 
     //---- Init the fifoCount ----
-    *txFifoCount = (atomic_int_fast32_t*) *txFifoBlock;
-    atomic_init(*txFifoCount, 0);
+    fifo->fifoCount = (atomic_int_fast32_t*) fifo->fifoBlock;
+    atomic_init(fifo->fifoCount, 0);
 
-    char* txFifoBlockBytes = (char*) *txFifoBlock;
-    *txFifoBuffer = (void*) (txFifoBlockBytes + sizeof(atomic_int_fast32_t));
+    char* fifoBlockBytes = (char*) fifo->fifoBlock;
+    fifo->fifoBuffer = (void*) (fifoBlockBytes + sizeof(atomic_int_fast32_t));
 
     //FIFO init done
     //---- Release the semaphore ----
-    sem_post(*txSem);
+    sem_post(fifo->txSem);
 
     //---- Wait for consumer to join ---
-    sem_wait(*rxSem);
+    sem_wait(fifo->rxSem);
 
     return sharedBlockSize;
 }
 
-int consumerOpenFIFOBlock(char *sharedName, int *rxSharedFD, char** txSemaphoreName, char** rxSemaphoreName, sem_t **txSem, sem_t **rxSem, atomic_int_fast32_t** rxFifoCount, volatile void** rxFifoBlock, volatile void** rxFifoBuffer, size_t fifoSizeBytes){
+int consumerOpenFIFOBlock(char *sharedName, size_t fifoSizeBytes, sharedMemoryFIFO_t *fifo){
+    fifo->sharedName = sharedName;
+    fifo->fifoSizeBytes = fifoSizeBytes;
     size_t sharedBlockSize = fifoSizeBytes + sizeof(atomic_int_fast32_t);
+    fifo->fifoSharedBlockSizeBytes = sharedBlockSize;
 
     //---- Get access to the semaphore ----
     int sharedNameLen = strlen(sharedName);
-    *txSemaphoreName = malloc(sharedNameLen+5);
-    strcpy(*txSemaphoreName, "/");
-    strcat(*txSemaphoreName, sharedName);
-    strcat(*txSemaphoreName, "_TX");
-    *txSem = sem_open(*txSemaphoreName, O_CREAT, S_IRWXU, 0); //Initialize to 0, the consumer will wait
-    if (*txSem == SEM_FAILED){
+    fifo->txSemaphoreName = malloc(sharedNameLen+5);
+    strcpy(fifo->txSemaphoreName, "/");
+    strcat(fifo->txSemaphoreName, sharedName);
+    strcat(fifo->txSemaphoreName, "_TX");
+    fifo->txSem = sem_open(fifo->txSemaphoreName, O_CREAT, S_IRWXU, 0); //Initialize to 0, the consumer will wait
+    if (fifo->txSem == SEM_FAILED){
         printf("Unable to open tx semaphore\n");
         perror(NULL);
         exit(1);
     }
 
-    *rxSemaphoreName = malloc(sharedNameLen+5);
-    strcpy(*rxSemaphoreName, "/");
-    strcat(*rxSemaphoreName, sharedName);
-    strcat(*rxSemaphoreName, "_RX");
-    *rxSem = sem_open(*rxSemaphoreName, O_CREAT, S_IRWXU, 0); //Initialize to 0, the consumer will wait
-    if (*rxSem == SEM_FAILED){
+    fifo->rxSemaphoreName = malloc(sharedNameLen+5);
+    strcpy(fifo->rxSemaphoreName, "/");
+    strcat(fifo->rxSemaphoreName, sharedName);
+    strcat(fifo->rxSemaphoreName, "_RX");
+    fifo->rxSem = sem_open(fifo->rxSemaphoreName, O_CREAT, S_IRWXU, 0); //Initialize to 0, the consumer will wait
+    if (fifo->rxSem == SEM_FAILED){
         printf("Unable to open rx semaphore\n");
         perror(NULL);
         exit(1);
     }
 
     //Block on the semaphore while the producer is initializing
-    int status = sem_wait(*txSem);
+    int status = sem_wait(fifo->txSem);
     if(status == -1){
         printf("Unable to wait on tx semaphore\n");
         perror(NULL);
@@ -115,8 +136,8 @@ int consumerOpenFIFOBlock(char *sharedName, int *rxSharedFD, char** txSemaphoreN
     }
 
     //---- Open shared mem ----
-    *rxSharedFD = shm_open(sharedName, O_RDWR, S_IRWXU);
-    if(*rxSharedFD == -1){
+    fifo->sharedFD = shm_open(sharedName, O_RDWR, S_IRWXU);
+    if(fifo->sharedFD == -1){
         printf("Unable to open rx shm\n");
         perror(NULL);
         exit(1);
@@ -124,21 +145,21 @@ int consumerOpenFIFOBlock(char *sharedName, int *rxSharedFD, char** txSemaphoreN
 
     //No need to resize shared memory, the producer has already done that
 
-    *rxFifoBlock = mmap(NULL, sharedBlockSize, PROT_READ | PROT_WRITE, MAP_SHARED, *rxSharedFD, 0);
-    if(*rxFifoBlock == MAP_FAILED){
+    fifo->fifoBlock = mmap(NULL, sharedBlockSize, PROT_READ | PROT_WRITE, MAP_SHARED, fifo->sharedFD, 0);
+    if(fifo->fifoBlock == MAP_FAILED){
         printf("Rx mmap failed\n");
         perror(NULL);
         exit(1);
     }
 
     //---- Get appropriate pointers from the shared memory block ----
-    *rxFifoCount = (atomic_int_fast32_t*) *rxFifoBlock;
+    fifo->fifoCount = (atomic_int_fast32_t*) fifo->fifoBlock;
 
-    char* rxFifoBlockBytes = (char*) *rxFifoBlock;
-    *rxFifoBuffer = (void*) (rxFifoBlockBytes + sizeof(atomic_int_fast32_t));
+    char* fifoBlockBytes = (char*) fifo->fifoBlock;
+    fifo->fifoBuffer = (void*) (fifoBlockBytes + sizeof(atomic_int_fast32_t));
 
     //inform producer that consumer is ready
-    sem_post(*rxSem);
+    sem_post(fifo->rxSem);
 
     return sharedBlockSize;
 }
@@ -149,8 +170,8 @@ int consumerOpenFIFOBlock(char *sharedName, int *rxSharedFD, char** txSemaphoreN
 //fifoCount is in bytes
 
 //returns number of elements written
-int write_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentOffset, volatile void* dst_uncast, void* src_uncast, size_t elementSize, int numElements){
-    char* dst = (char*) dst_uncast;
+int write_fifo(void* src_uncast, size_t elementSize, int numElements, sharedMemoryFIFO_t *fifo){
+    char* dst = (char*) fifo->fifoBuffer;
     char* src = (char*) src_uncast;
 
     bool hasRoom = false;
@@ -158,8 +179,8 @@ int write_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentO
     size_t bytesToWrite = elementSize*numElements;
 
     while(!hasRoom){
-        int currentCount = atomic_load(fifoCount);
-        int spaceInFIFO = fifoSize - currentCount;
+        int currentCount = atomic_load(fifo->fifoCount);
+        int spaceInFIFO = fifo->fifoSizeBytes - currentCount;
         //TODO: REMOVE
         if(spaceInFIFO<0){
             printf("FIFO had a negative count");
@@ -173,12 +194,12 @@ int write_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentO
 
     //There is room in the FIFO, write into it
     //Write up to the end of the buffer, wrap around if nessisary
-    size_t currentOffsetLocal = *currentOffset;
-    size_t bytesToEnd = fifoSize - currentOffsetLocal;
+    size_t currentOffsetLocal = fifo->currentOffset;
+    size_t bytesToEnd = fifo->fifoSizeBytes - currentOffsetLocal;
     size_t bytesToTransferFirst = bytesToEnd < bytesToWrite ? bytesToEnd : bytesToWrite;
     memcpy(dst+currentOffsetLocal, src, bytesToTransferFirst);
     currentOffsetLocal += bytesToTransferFirst;
-    if(currentOffsetLocal >= fifoSize){
+    if(currentOffsetLocal >= fifo->fifoSizeBytes){
         //Wrap around
         currentOffsetLocal = 0;
 
@@ -193,24 +214,24 @@ int write_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentO
     }
 
     //Update the current offset
-    *currentOffset = currentOffsetLocal;
+    fifo->currentOffset = currentOffsetLocal;
 
     //Update the fifoCount, do not need the new value
-    atomic_fetch_add(fifoCount, bytesToWrite);
+    atomic_fetch_add(fifo->fifoCount, bytesToWrite);
 
     return numElements;
 }
 
-int read_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentOffset, void* dst_uncast, volatile void* src_uncast, size_t elementSize, int numElements){
+int read_fifo(void* dst_uncast, size_t elementSize, int numElements, sharedMemoryFIFO_t *fifo){
     char* dst = (char*) dst_uncast;
-    char* src = (char*) src_uncast;
+    char* src = (char*) fifo->fifoBuffer;
 
     bool hasData = false;
 
     size_t bytesToRead = elementSize*numElements;
 
     while(!hasData){
-        int currentCount = atomic_load(fifoCount);
+        int currentCount = atomic_load(fifo->fifoCount);
         //TODO: REMOVE
         if(currentCount<0){
             printf("FIFO had a negative count");
@@ -225,12 +246,12 @@ int read_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentOf
     //There is enough data in the fifo to complete a read operation
     //Read from the FIFO
     //Read up to the end of the buffer and wrap if nessisary
-    size_t currentOffsetLocal = *currentOffset;
-    size_t bytesToEnd = fifoSize - currentOffsetLocal;
+    size_t currentOffsetLocal = fifo->currentOffset;
+    size_t bytesToEnd = fifo->fifoSizeBytes - currentOffsetLocal;
     size_t bytesToTransferFirst = bytesToEnd < bytesToRead ? bytesToEnd : bytesToRead;
     memcpy(dst, src+currentOffsetLocal, bytesToTransferFirst);
     currentOffsetLocal += bytesToTransferFirst;
-    if(currentOffsetLocal >= fifoSize){
+    if(currentOffsetLocal >= fifo->fifoSizeBytes){
         //Wrap around
         currentOffsetLocal = 0;
 
@@ -245,10 +266,88 @@ int read_fifo(size_t fifoSize, atomic_int_fast32_t* fifoCount, size_t *currentOf
     }
 
     //Update the current offset
-    *currentOffset = currentOffsetLocal;
+    fifo->currentOffset = currentOffsetLocal;
 
     //Update the fifoCount, do not need the new value
-    atomic_fetch_sub(fifoCount, bytesToRead);
+    atomic_fetch_sub(fifo->fifoCount, bytesToRead);
 
     return numElements;
+}
+
+void cleanupHelper(sharedMemoryFIFO_t *fifo){
+    if(fifo->fifoBlock != NULL) {
+        int status = munmap(fifo->fifoBlock, fifo->fifoSharedBlockSizeBytes);
+        if (status == -1) {
+            printf("Error in tx munmap\n");
+            perror(NULL);
+        }
+    }
+
+    if(fifo->txSem != NULL) {
+        int status = sem_close(fifo->txSem);
+        if (status == -1) {
+            printf("Error in tx semaphore close\n");
+            perror(NULL);
+        }
+    }
+
+    if(fifo->rxSem != NULL) {
+        int status = sem_close(fifo->rxSem);
+        if (status == -1) {
+            printf("Error in rx semaphore close\n");
+            perror(NULL);
+        }
+    }
+}
+
+void cleanupProducer(sharedMemoryFIFO_t *fifo){
+    bool unlinkSharedBlock = fifo->fifoBlock != NULL;
+    bool unlinkTxSem = fifo->txSem != NULL;
+    bool unlinkRxSem = fifo->rxSem != NULL;
+
+    cleanupHelper(fifo);
+
+    if(unlinkSharedBlock) {
+        int status = shm_unlink(fifo->sharedName);
+        if (status == -1) {
+            printf("Error in tx fifo unlink\n");
+            perror(NULL);
+        }
+    }
+
+    if(unlinkTxSem) {
+        int status = sem_unlink(fifo->txSemaphoreName);
+        if (status == -1) {
+            printf("Error in tx semaphore unlink\n");
+            perror(NULL);
+        }
+    }
+
+    if(unlinkRxSem) {
+        int status = sem_unlink(fifo->rxSemaphoreName;
+        if (status == -1) {
+            printf("Error in rx semaphore unlink\n");
+            perror(NULL);
+        }
+    }
+
+    if(fifo->txSemaphoreName != NULL){
+        free(fifo->txSemaphoreName);
+    }
+
+    if(fifo->rxSemaphoreName != NULL){
+        free(fifo->rxSemaphoreName);
+    }
+}
+
+void cleanupConsumer(sharedMemoryFIFO_t *fifo){
+    cleanupHelper(fifo);
+
+    if(fifo->txSemaphoreName != NULL){
+        free(fifo->txSemaphoreName);
+    }
+
+    if(fifo->rxSemaphoreName != NULL){
+        free(fifo->rxSemaphoreName);
+    }
 }

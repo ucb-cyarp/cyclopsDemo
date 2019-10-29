@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
     char *rxSharedName = NULL;
 
     int32_t blockLen = 1;
-    int fifoSizeBlks;
+    int fifoSizeBlks = 8;
 
     int cpu = -1;
 

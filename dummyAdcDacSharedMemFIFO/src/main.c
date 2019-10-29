@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
     char *rxSharedName = NULL;
 
     int32_t blockLen = 1;
-    int32_t fifoSize = 1;
+    int32_t fifoSize = 8;
     bool print;
 
     float gain = 1;

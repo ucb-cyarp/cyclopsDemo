@@ -29,4 +29,4 @@ add_executable(sharedMemFIFOBench src/main.c ${COMMON_SRCS})
 target_link_libraries(sharedMemFIFOBench ${CMAKE_THREAD_LIBS_INIT} ${LIBRT})
 
 add_executable(cleanupShared src/cleanupShared.c)
-target_link_libraries(cleanupShared ${LIBRT})
+target_link_libraries(cleanupShared ${CMAKE_THREAD_LIBS_INIT} ${LIBRT})

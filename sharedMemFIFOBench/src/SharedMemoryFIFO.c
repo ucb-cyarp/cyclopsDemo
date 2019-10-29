@@ -170,7 +170,7 @@ int consumerOpenFIFOBlock(char *sharedName, size_t fifoSizeBytes, sharedMemoryFI
 //fifoCount is in bytes
 
 //returns number of elements written
-int write_fifo(void* src_uncast, size_t elementSize, int numElements, sharedMemoryFIFO_t *fifo){
+int writeFifo(void* src_uncast, size_t elementSize, int numElements, sharedMemoryFIFO_t *fifo){
     char* dst = (char*) fifo->fifoBuffer;
     char* src = (char*) src_uncast;
 
@@ -222,7 +222,7 @@ int write_fifo(void* src_uncast, size_t elementSize, int numElements, sharedMemo
     return numElements;
 }
 
-int read_fifo(void* dst_uncast, size_t elementSize, int numElements, sharedMemoryFIFO_t *fifo){
+int readFifo(void* dst_uncast, size_t elementSize, int numElements, sharedMemoryFIFO_t *fifo){
     char* dst = (char*) dst_uncast;
     char* src = (char*) fifo->fifoBuffer;
 

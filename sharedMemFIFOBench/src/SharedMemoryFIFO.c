@@ -22,6 +22,7 @@ void initSharedMemoryFIFO(sharedMemoryFIFO_t *fifo){
     fifo->fifoSizeBytes = 0;
     fifo->currentOffset = 0;
     fifo->fifoSharedBlockSizeBytes = 0;
+    fifo->rxReady = false;
 }
 
 int producerOpenInitFIFOBlock(char *sharedName, size_t fifoSizeBytes, sharedMemoryFIFO_t *fifo){
@@ -90,9 +91,6 @@ int producerOpenInitFIFOBlock(char *sharedName, size_t fifoSizeBytes, sharedMemo
     //FIFO init done
     //---- Release the semaphore ----
     sem_post(fifo->txSem);
-
-    //---- Wait for consumer to join ---
-    sem_wait(fifo->rxSem);
 
     return sharedBlockSize;
 }
@@ -173,6 +171,12 @@ int consumerOpenFIFOBlock(char *sharedName, size_t fifoSizeBytes, sharedMemoryFI
 int writeFifo(void* src_uncast, size_t elementSize, int numElements, sharedMemoryFIFO_t *fifo){
     char* dst = (char*) fifo->fifoBuffer;
     char* src = (char*) src_uncast;
+
+    if(!fifo->rxReady) {
+        //---- Wait for consumer to join ---
+        sem_wait(fifo->rxSem);
+        fifo->rxReady = true;
+    }
 
     bool hasRoom = false;
 

@@ -33,7 +33,7 @@ void* mainThread(void* uncastArgs){
     size_t fifoBlockSizeBytes = fifoBufferSizeBytes + sizeof(atomic_int_fast32_t);
 
     if(txSharedName != NULL) {
-        producerOpenInitFIFOBlock(txSharedName, fifoBufferSizeBytes, &sharedMemoryFifo);
+        producerOpenInitFIFO(txSharedName, fifoBufferSizeBytes, &sharedMemoryFifo);
     }
 
     if(rxSharedName != NULL) {

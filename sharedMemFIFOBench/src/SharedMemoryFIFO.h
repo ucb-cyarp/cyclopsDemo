@@ -23,11 +23,12 @@ typedef struct{
     size_t fifoSizeBytes;
     size_t fifoSharedBlockSizeBytes;
     size_t currentOffset;
+    bool rxReady;
 } sharedMemoryFIFO_t;
 
 void initSharedMemoryFIFO(sharedMemoryFIFO_t *fifo);
 
-int producerOpenInitFIFOBlock(char *sharedName, size_t fifoSizeBytes, sharedMemoryFIFO_t *fifo);
+int producerOpenInitFIFO(char *sharedName, size_t fifoSizeBytes, sharedMemoryFIFO_t *fifo);
 
 int consumerOpenFIFOBlock(char *sharedName, size_t fifoSizeBytes, sharedMemoryFIFO_t *fifo);
 

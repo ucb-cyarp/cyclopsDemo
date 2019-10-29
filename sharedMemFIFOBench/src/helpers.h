@@ -8,7 +8,6 @@
 #include <stdatomic.h>
 #include <semaphore.h>
 #include <sys/mman.h>
-#include <stdatomic.h>
 #include <unistd.h>
 
 int producerOpenInitFIFOBlock(char *sharedName, int *txSharedFD, char** txSemaphoreName, char** rxSemaphoreName, sem_t **txSem, sem_t **rxSem, atomic_int_fast32_t** txFifoCount, void** txFifoBlock, void** txFifoBuffer, size_t fifoSizeBytes);

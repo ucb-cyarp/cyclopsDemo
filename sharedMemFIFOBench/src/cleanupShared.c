@@ -9,6 +9,8 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <semaphore.h>
+#include <sys/mman.h>
 
 void printHelp(){
     printf("cleanupShared sharedName\n");
@@ -27,7 +29,7 @@ int main(int argc, char **argv) {
 
     sharedName = argv[1];
 
-    status = shm_unlink(txSharedName);
+    int status = shm_unlink(txSharedName);
     if(status == -1){
         printf("Error in fifo block unlink\n");
         perror(NULL);

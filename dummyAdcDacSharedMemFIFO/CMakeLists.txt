@@ -20,8 +20,8 @@ if(NOT LIBRT)
 endif()
 
 set(COMMON_SRCS
-        src/SharedMemoryFIFO.c
-        src/SharedMemoryFIFO.h
+        src/depends/BerkeleySharedMemoryFIFO.c
+        src/depends/BerkeleySharedMemoryFIFO.h
         src/mainThread.c
         src/mainThread.h)
 

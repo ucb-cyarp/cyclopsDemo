@@ -10,7 +10,7 @@
 #include <sys/mman.h>
 #include <stdatomic.h>
 
-#include "SharedMemoryFIFO.h"
+#include "depends/BerkeleySharedMemoryFIFO.h"
 
 void* mainThread(void* uncastArgs){
     threadArgs_t* args = (threadArgs_t*) uncastArgs;

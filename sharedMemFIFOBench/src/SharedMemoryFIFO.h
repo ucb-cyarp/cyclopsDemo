@@ -9,6 +9,7 @@
 #include <semaphore.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 typedef struct{
     char *sharedName;

@@ -12,17 +12,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3e16a817-04ee-4390-b8c2-c17d645e9c5d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/../dummyAdcDac/.idea/$CACHE_FILE$" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/sharedMemFIFOBench.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/helpers.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/helpers.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/mainThread.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/mainThread.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/helpers.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/helpers.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mainThread.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/mainThread.c" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -79,8 +72,16 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1572240858593</updated>
-      <workItem from="1572240861980" duration="16023000" />
+      <workItem from="1572240861980" duration="16345000" />
     </task>
+    <task id="LOCAL-00001" summary="Initial commit of shared_mem FIFO bench">
+      <created>1572313461236</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1572313461236</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -96,5 +97,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Initial commit of shared_mem FIFO bench" />
+    <option name="LAST_COMMIT_MESSAGE" value="Initial commit of shared_mem FIFO bench" />
   </component>
 </project>

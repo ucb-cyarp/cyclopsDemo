@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
 
     if (argc < 2) {
         printHelp();
+        exit(1);
     }
 
     sharedName = argv[1];

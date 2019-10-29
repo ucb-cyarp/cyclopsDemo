@@ -25,7 +25,7 @@ void initSharedMemoryFIFO(sharedMemoryFIFO_t *fifo){
     fifo->rxReady = false;
 }
 
-int producerOpenInitFIFOBlock(char *sharedName, size_t fifoSizeBytes, sharedMemoryFIFO_t *fifo){
+int producerOpenInitFIFO(char *sharedName, size_t fifoSizeBytes, sharedMemoryFIFO_t *fifo){
     fifo->sharedName = sharedName;
     fifo->fifoSizeBytes = fifoSizeBytes;
     size_t sharedBlockSize = fifoSizeBytes + sizeof(atomic_int_fast32_t);

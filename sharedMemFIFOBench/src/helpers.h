@@ -10,9 +10,9 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-int producerOpenInitFIFOBlock(char *sharedName, int *txSharedFD, char** txSemaphoreName, char** rxSemaphoreName, sem_t **txSem, sem_t **rxSem, atomic_int_fast32_t** txFifoCount, void** txFifoBlock, void** txFifoBuffer, size_t fifoSizeBytes);
+int producerOpenInitFIFOBlock(char *sharedName, int *txSharedFD, char** txSemaphoreName, char** rxSemaphoreName, sem_t **txSem, sem_t **rxSem, atomic_int_fast32_t** txFifoCount, volatile void** txFifoBlock, volatile void** txFifoBuffer, size_t fifoSizeBytes);
 
-int consumerOpenFIFOBlock(char *sharedName, int *rxSharedFD, char** txSemaphoreName, char** rxSemaphoreName, sem_t **txSem, sem_t **rxSem, atomic_int_fast32_t** rxFifoCount, void** rxFifoBlock, void** rxFifoBuffer, size_t fifoSizeBytes);
+int consumerOpenFIFOBlock(char *sharedName, int *rxSharedFD, char** txSemaphoreName, char** rxSemaphoreName, sem_t **txSem, sem_t **rxSem, atomic_int_fast32_t** rxFifoCount, volatile void** rxFifoBlock, volatile void** rxFifoBuffer, size_t fifoSizeBytes);
 
 
 //NOTE: this function blocks until numElements can be written into the FIFO

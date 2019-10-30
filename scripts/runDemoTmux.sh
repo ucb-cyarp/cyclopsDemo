@@ -3,11 +3,11 @@
 # but used a lot of tmux forum splunking, manpage reading, and various user's tmux
 
 RxSrc=rx_combined_man_partition_fewerLuts_demo_fastslim1_fast1_slow1
-TxSrc=transmitter_man_partition_fewerLuts_demo_fastslim1_fast1_slow1
+TxSrc=transmitter_man_partition_fewerLuts_demo_mod1_raisedCos1_lpf2
 cyclopsASCIIDir=~/git/cyclopsASCIILink
 uhdToPipesDir=~/git/uhdToPipes
 dummyAdcDacDir=~/git/cyclopsDemo/dummyAdcDac
-BlockSize=32
+BlockSize=64
 
 if [ -z $1 ]; then
     USE_DUMMY=0
@@ -16,7 +16,8 @@ else
 fi
 
 appCPU=1
-TxTokens=10
+TxTokens=10000
+ProcessLimitCyclops=10
 
 vitisFromADCPipe="rx/input_bundle_1.pipe"
 vitisFromRxPipe="rx/output_bundle_2.pipe"
@@ -75,9 +76,9 @@ sleep 5
 
 #Start cyclopsASCII (before the ADC/DAC)
 #Feedback backpressure will prevent a runaway
-tmux split-window -v -d -t vitis_cyclopse_demo:0 "printf '\\033]2;%s\\033\\\\' 'Cyclops_ASCII_Application'; ${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ./${vitisFromRxPipe} -tx ./${vitisToTxPipe} -txfb ./${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU}"
+tmux split-window -v -d -t vitis_cyclopse_demo:0 "printf '\\033]2;%s\\033\\\\' 'Cyclops_ASCII_Application'; ${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ./${vitisFromRxPipe} -tx ./${vitisToTxPipe} -txfb ./${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} -processlimit ${ProcessLimitCyclops}"
 # tmux rename-window -t vitis_cyclopse_demo:2 'cyclopsASCII'
-echo "${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ./${vitisFromRxPipe} -tx ./${vitisToTxPipe} -txfb ./${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU}"
+echo "${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ./${vitisFromRxPipe} -tx ./${vitisToTxPipe} -txfb ./${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} -processlimit ${ProcessLimitCyclops}"
 
 if [ ${USE_DUMMY} -ne 0 ]; then
     #Start dummyAdcDac

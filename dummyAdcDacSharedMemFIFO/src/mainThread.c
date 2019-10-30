@@ -48,12 +48,14 @@ void* mainThread(void* uncastArgs){
     bool running = true;
     while(running){
         //Get samples from rx pipe (ok to block)
+        // printf("About to read samples\n");
         int samplesRead = readFifo(sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, &txFifo);
         if (samplesRead != blockLen) {
             //Done!
             running = false;
             break;
         }
+        // printf("Read\n");
 
         if(gain !=0){
             for(int i = 0; i<blockLen*2; i++){
@@ -62,9 +64,13 @@ void* mainThread(void* uncastArgs){
         }
 
         //Write samples to tx pipe (ok to block)
+        // printf("About to write samples\n");
         writeFifo(sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, &rxFifo);
+        // printf("Wrote samples\n");
+        // printf("About to write token\n");
         FEEDBACK_DATATYPE tokensReturned = 1;
         writeFifo(&tokensReturned, sizeof(tokensReturned), 1, &txfbFifo);
+        // printf("Wrote token\n");
     }
 
     free(sampBuffer);

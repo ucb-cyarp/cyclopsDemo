@@ -2,8 +2,8 @@
 # Inspired by https://stackoverflow.com/questions/5447278/bash-scripts-with-tmux-to-launch-a-4-paned-window
 # but used a lot of tmux forum splunking, manpage reading, and various user's tmux
 
-RxSrc=rx_combined_man_partition_fewerLuts_demo_fastslim1_fast1_slow1
-TxSrc=transmitter_man_partition_fewerLuts_demo_fastslim1_fast1_slow1
+RxSrc=rx_combined_man_partition_fewerLuts_demo_raisedcos1_fastslim2_fast3_slow3
+TxSrc=transmitter_man_partition_fewerLuts_demo_mod1_raisedCos1_lpf2
 cyclopsASCIIDir=~/git/cyclopsASCIILink
 uhdToPipesDir=~/git/uhdToPipes
 dummyAdcDacDir=~/git/cyclopsDemo/dummyAdcDac

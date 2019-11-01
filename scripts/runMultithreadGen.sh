@@ -1,6 +1,6 @@
 #!/bin/bash
-RxSrc=rx_combined_man_partition_fewerLuts_demo_fastslim1_fast1_slow1
-TxSrc=transmitter_man_partition_fewerLuts_demo_fastslim1_fast1_slow1
+RxSrc=rx_combined_man_partition_fewerLuts_demo_raisedcos1_fastslim2_fast3_slow3
+TxSrc=transmitter_man_partition_fewerLuts_demo_mod1_raisedCos1_lpf2
 BlockSize=32
 
 cyclopsASCIIDir=~/git/cyclopsASCIILink

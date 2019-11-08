@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5.1)
-project(dummyAdcDac C)
+project(pipeBench C)
 
 #Using technique from Marcus D. Hanwell on https://blog.kitware.com/cmake-and-the-default-build-type/ to set default build type
 set(default_build_type "Release")
@@ -11,13 +11,15 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
             "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-set(CMAKE_C_STANDARD 11)
-
 find_package(Threads)
+
+set(CMAKE_C_STANDARD 11)
 
 set(COMMON_SRCS
         src/mainThread.c
-        src/mainThread.h)
+        src/mainThread.h
+        src/helpers.c
+        src/helpers.h)
 
-add_executable(dummyAdcDac src/main.c ${COMMON_SRCS})
-target_link_libraries(dummyAdcDac ${CMAKE_THREAD_LIBS_INIT})
+add_executable(pipeBench src/main.c ${COMMON_SRCS})
+target_link_libraries(pipeBench ${CMAKE_THREAD_LIBS_INIT})

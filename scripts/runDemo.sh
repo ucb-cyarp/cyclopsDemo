@@ -1,12 +1,12 @@
 #!/bin/bash
 # using https://stackoverflow.com/questions/1908610/how-to-get-pid-of-background-process
 
-RxSrc=rx_combined_man_partition_fewerLuts_demo_fastslim1_fast1_slow1
-TxSrc=transmitter_man_partition_fewerLuts_demo_fastslim1_fast1_slow1
+RxSrc=rx_combined_man_partition_fewerLuts_demo_raisedcos1_fastslim2_fast3_slow3
+TxSrc=transmitter_man_partition_fewerLuts_demo_mod1_raisedCos1_lpf2
 cyclopsASCIIDir=~/git/cyclopsASCIILink
 uhdToPipesDir=~/git/uhdToPipes
 dummyAdcDacDir=~/git/cyclopsDemo/dummyAdcDac
-BlockSize=32
+BlockSize=64
 
 if [ -z $1 ]; then
     USE_DUMMY=0
@@ -16,6 +16,7 @@ fi
 
 appCPU=1
 TxTokens=10
+ProcessLimitCyclops=10
 
 vitisFromADCPipe="rx/input_bundle_1.pipe"
 vitisFromRxPipe="rx/output_bundle_2.pipe"
@@ -74,9 +75,9 @@ sleep 5
 
 #Start cyclopsASCII (before the ADC/DAC)
 #Feedback backpressure will prevent a runaway
-${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ./${vitisFromRxPipe} -tx ./${vitisToTxPipe} -txfb ./${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} & 
+${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ./${vitisFromRxPipe} -tx ./${vitisToTxPipe} -txfb ./${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} -processlimit ${ProcessLimitCyclops} & 
 CYCLOPSASCII_PID=$!
-CYCLOPSASCII_CMD="${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ./${vitisFromRxPipe} -tx ./${vitisToTxPipe} -txfb ./${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} &"
+CYCLOPSASCII_CMD="${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ./${vitisFromRxPipe} -tx ./${vitisToTxPipe} -txfb ./${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} -processlimit ${ProcessLimitCyclops} &"
 echo "[${CYCLOPSASCII_PID}] ${CYCLOPSASCII_CMD}"
 
 if [ ${USE_DUMMY} -ne 0 ]; then

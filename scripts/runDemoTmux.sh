@@ -31,7 +31,7 @@ rxCPU=18
 
 usrpArgs="addr=192.168.40.2"
 Freq=5800000000
-Rate=4000000
+Rate=1000000
 TxGainDB=30
 RxGainDB=30
 txChan=0

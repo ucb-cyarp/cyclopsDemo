@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#define FLUSH_PERIOD (16)
+
 void* mainThread(void* uncastArgs){
     threadArgs_t* args = (threadArgs_t*) uncastArgs;
     char *txPipeName = args->txPipeName;
@@ -49,6 +51,7 @@ void* mainThread(void* uncastArgs){
 
     //Main Loop
     bool running = true;
+    int flushCount = 0;
     while(running){
         //Get samples from rx pipe (ok to block)
         int samplesRead = fread(sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, txPipe);
@@ -73,10 +76,16 @@ void* mainThread(void* uncastArgs){
 
         //Write samples to tx pipe (ok to block)
         fwrite(sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, rxPipe);
-        fflush(rxPipe);
         FEEDBACK_DATATYPE tokensReturned = 1;
         fwrite(&tokensReturned, sizeof(tokensReturned), 1, txFeedbackPipe);
-        fflush(txFeedbackPipe);
+
+        if(flushCount >= FLUSH_PERIOD){
+            fflush(rxPipe);
+            fflush(txFeedbackPipe);
+            flushCount = 0;
+        }else{
+            flushCount++;
+        }
     }
 
     if(rxPipe != NULL){

@@ -40,6 +40,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <sys/types.h>
 
 void initSharedMemoryFIFO(sharedMemoryFIFO_t *fifo){
     fifo->sharedName = NULL;
@@ -395,9 +396,17 @@ bool isReadyForReading(sharedMemoryFIFO_t *fifo){
 }
 
 bool isReadyForWriting(sharedMemoryFIFO_t *fifo){
-    if(!fifo->rxReady){
-        return false;
+    if(!fifo->rxReady) {
+        //---- Check if consumer joined ----
+        int status = sem_trywait(fifo->rxSem);
+        if(status == 0){
+            fifo->rxReady = true;
+        }else{
+            //Consumer has not joined yet
+            return false;
+        }
     }
+
     int32_t currentCount = atomic_load(fifo->fifoCount);
     return currentCount < fifo->fifoSizeBytes;
 }

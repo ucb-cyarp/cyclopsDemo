@@ -7,7 +7,7 @@ TxSrc="transmitter_man_partition_fewerLuts_demo_mod1_raisedCos1_lpf2"
 cyclopsASCIIDir="~/git/cyclopsASCIILink-sharedMem"
 uhdToPipesDir="~/git/uhdToPipes"
 dummyAdcDacDir="~/git/cyclopsDemo/dummyAdcDacSharedMemFIFO"
-BlockSize=64
+BlockSize=32
 IO_FIFO_SIZE=128
 
 if [ -z $1 ]; then
@@ -17,7 +17,9 @@ else
 fi
 
 appCPU=1
-TxTokens=10000
+TxTokens=10
+txPer=1.0
+
 ProcessLimitCyclops=10
 vitisFromADCPipe="rx_demo_input_bundle_1"
 vitisFromRxPipe="rx_demo_output_bundle_2"
@@ -25,8 +27,9 @@ vitisFromRxPipe="rx_demo_output_bundle_2"
 vitisToTxPipe="tx_demo_input_bundle_1"
 vitisToDACPipe="tx_demo_output_bundle_2"
 
-txCPU=16
-rxCPU=17
+uhdCPU=2
+txCPU=3
+rxCPU=18
 usrpArgs="addr=192.168.40.2"
 Freq=5800000000
 Rate=1000000
@@ -74,9 +77,9 @@ sleep 5
 
 #Start cyclopsASCII (before the ADC/DAC)
 #Feedback backpressure will prevent a runaway
-tmux split-window -v -d -t vitis_cyclopse_demo:0 "printf '\\033]2;%s\\033\\\\' 'Cyclops_ASCII_Application'; ${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ${vitisFromRxPipe} -tx ${vitisToTxPipe} -txfb ${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} -processlimit ${ProcessLimitCyclops} -fifosize ${IO_FIFO_SIZE}"
+tmux split-window -v -d -t vitis_cyclopse_demo:0 "printf '\\033]2;%s\\033\\\\' 'Cyclops_ASCII_Application'; ${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ${vitisFromRxPipe} -tx ${vitisToTxPipe} -txfb ${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} -processlimit ${ProcessLimitCyclops} -txperiod ${txPer} -fifosize ${IO_FIFO_SIZE}"
 # tmux rename-window -t vitis_cyclopse_demo:2 'cyclopsASCII'
-echo "${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ${vitisFromRxPipe} -tx ${vitisToTxPipe} -txfb ${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} -processlimit ${ProcessLimitCyclops} -fifosize ${IO_FIFO_SIZE}"
+echo "${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ${vitisFromRxPipe} -tx ${vitisToTxPipe} -txfb ${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} -processlimit ${ProcessLimitCyclops} -txperiod ${txPer} -fifosize ${IO_FIFO_SIZE}"
 
 if [ ${USE_DUMMY} -ne 0 ]; then
     #Start dummyAdcDac
@@ -85,11 +88,9 @@ if [ ${USE_DUMMY} -ne 0 ]; then
     echo "${dummyAdcDacBuildDir}/dummyAdcDacSharedMemFIFO -cpu ${txCPU} -rx ${vitisFromADCPipe} -tx ${vitisToDACPipe} -txfb ${TxFeedbkAppPipeName} -blocklen ${BlockSize} -fifosize ${IO_FIFO_SIZE}"
 else
     # #Start uhdToPipes
-    # ${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ./${vitisFromADCPipe} --txpipe ./${vitisToDACPipe} --txfeedbackpipe ./${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer --txchan ${txChan} --rxchan ${rxChan} &
-    tmux split-window -v -d -t vitis_cyclopse_demo:0.2 "printf '\\033]2;%s\\033\\\\' 'UHD/USRP'; module load uhd; ${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ${vitisFromADCPipe} --txpipe ${vitisToDACPipe} --txfeedbackpipe ${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer --txchan ${txChan} --rxchan ${rxChan} --txratelimit --fifosize ${IO_FIFO_SIZE}"
+    tmux split-window -v -d -t vitis_cyclopse_demo:0.2 "printf '\\033]2;%s\\033\\\\' 'UHD/USRP'; module load uhd; ${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB}  --uhdcpu ${uhdCPU} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ${vitisFromADCPipe} --txpipe ${vitisToDACPipe} --txfeedbackpipe ${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer --txchan ${txChan} --rxchan ${rxChan} --txratelimit --fifosize ${IO_FIFO_SIZE}"
     # tmux rename-window -t vitis_cyclopse_demo:3 'uhdToPipes'
-    # UDDTOPIPES_CMD="${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ./${vitisFromADCPipe} --txpipe ./${vitisToDACPipe} --txfeedbackpipe ./${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer --txchan ${txChan} --rxchan ${rxChan} &"
-    echo "${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ${vitisFromADCPipe} --txpipe ${vitisToDACPipe} --txfeedbackpipe ${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer --txchan ${txChan} --rxchan ${rxChan} --txratelimit --fifosize ${IO_FIFO_SIZE}"
+    echo "${uhdToPipesBuildDir}/uhdToPipes -a ${usrpArgs} -f ${Freq} -r ${Rate} --txgain ${TxGainDB} --rxgain ${RxGainDB} --uhdcpu ${uhdCPU} --txcpu ${txCPU} --rxcpu ${rxCPU} --rxpipe ${vitisFromADCPipe} --txpipe ${vitisToDACPipe} --txfeedbackpipe ${TxFeedbkAppPipeName} --samppertransactrx ${BlockSize} --samppertransacttx ${BlockSize} --forcefulltxbuffer --txchan ${txChan} --rxchan ${rxChan} --txratelimit --fifosize ${IO_FIFO_SIZE}"
 fi
 
 cd ${curDir}

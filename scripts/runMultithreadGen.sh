@@ -1,11 +1,11 @@
 #!/bin/bash
-RxSrc=rx_combined_man_partition_fewerLuts_demo_raisedcos1_fastslim2_fast3_slow3
-TxSrc=transmitter_man_partition_fewerLuts_demo_mod1_raisedCos1_lpf2
+RxSrc=rx_rate_transition
+TxSrc=transmitter_rate_transition
 BlockSize=32
 IO_FIFO_SIZE=128
 
-cyclopsASCIIDir=~/git/cyclopsASCIILink
-cyclopsASCIISharedMemDir=~/git/cyclopsASCIILink-sharedMem
+cyclopsASCIIDir=~/multirate-demo/cyclopsASCIILink
+cyclopsASCIISharedMemDir=~/multirate-demo/cyclopsASCIILink-sharedMem
 
 curDir=`pwd`
 

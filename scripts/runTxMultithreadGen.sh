@@ -1,14 +1,14 @@
 #!/bin/bash
 
-./simulinkGraphMLImporter ../test/stimulus/simulink/radio/$1.graphml $1_vitis.graphml
+./simulinkGraphMLImporter ./$1.graphml $1_vitis.graphml
 if [ $? -ne 0 ]; then
         echo "GraphML Import Failed for Tx"
         exit 1
 fi
 OUT_DIR=cOut_$1
 mkdir ${OUT_DIR}
-#./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} tx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength 7 --ioFifoSize $3 --partitionMap [8,8,9,24,25]
-./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} tx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength 7 --ioFifoSize $3 --partitionMap [8,8,9,24,25] --printTelem
+#./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} tx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength 7 --ioFifoSize $3 --partitionMap [8,9,24,25,10,11]
+./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} tx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength 7 --ioFifoSize $3 --partitionMap [8,9,24,25,10,11] --printTelem
 if [ $? -ne 0 ]; then
         echo "Multithread Gen Failed for Tx"
         exit 1

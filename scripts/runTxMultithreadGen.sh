@@ -14,9 +14,9 @@ if [ $? -ne 0 ]; then
         exit 1
 fi
 cd ${OUT_DIR}
-cp -r ../infra/common .
-cp -r ../infra/depends .
-cp -r ../infra/intrin .
+cp -rs ../common .
+cp -rs ../depends .
+cp -rs ../intrin .
 make -f Makefile_tx_demo_io_linux_pipe.mk USE_PCM=0 USE_AMDuPROF=0
 if [ $? -ne 0 ]; then
         echo "Make Failed for Tx pipe"

@@ -1,11 +1,11 @@
 #!/bin/bash
-RxSrc=rx_rate_transition
-TxSrc=transmitter_rate_transition
+RxSrc=rev1BB_receiver
+TxSrc=rev1BB_transmitter
 BlockSize=32
 IO_FIFO_SIZE=128
 
-cyclopsASCIIDir=~/multirate-demo/cyclopsASCIILink
-cyclopsASCIISharedMemDir=~/multirate-demo/cyclopsASCIILink-sharedMem
+cyclopsASCIIDir=../submodules/cyclopsASCIILink
+# cyclopsASCIISharedMemDir=../submodules/cyclopsASCIILink-sharedMem
 
 curDir=`pwd`
 

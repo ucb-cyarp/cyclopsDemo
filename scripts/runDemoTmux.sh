@@ -4,9 +4,9 @@
 
 RxSrc=rev1BB_receiver
 TxSrc=rev1BB_transmitter
-cyclopsASCIIDir=../submodules/cyclopsASCIILink
-uhdToPipesDir=../submodules/uhdToPipes
-dummyAdcDacDir=../dummyAdcDac
+cyclopsASCIIDir=../../submodules/cyclopsASCIILink
+uhdToPipesDir=../../submodules/uhdToPipes
+dummyAdcDacDir=../../dummyAdcDac
 BlockSize=32
 
 if [ -z $1 ]; then
@@ -20,10 +20,10 @@ TxTokens=10
 txPer=1.0
 
 vitisFromADCPipe="rx/input_bundle_1.pipe"
-vitisFromRxPipe="rx/output_bundle_2.pipe"
+vitisFromRxPipe="rx/output_bundle_1.pipe"
 
 vitisToTxPipe="tx/input_bundle_1.pipe"
-vitisToDACPipe="tx/output_bundle_2.pipe"
+vitisToDACPipe="tx/output_bundle_1.pipe"
 
 uhdCPU=2
 txCPU=3

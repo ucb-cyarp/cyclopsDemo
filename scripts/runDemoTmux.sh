@@ -25,9 +25,9 @@ vitisFromRxPipe="rx/output_bundle_1.pipe"
 vitisToTxPipe="tx/input_bundle_1.pipe"
 vitisToDACPipe="tx/output_bundle_1.pipe"
 
-uhdCPU=2
-txCPU=3
-rxCPU=18
+uhdCPU=4
+txCPU=5
+rxCPU=6
 
 usrpArgs="addr=192.168.40.2"
 Freq=5800000000

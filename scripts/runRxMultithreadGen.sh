@@ -17,12 +17,12 @@ cd ${OUT_DIR}
 cp -rs ../common .
 cp -rs ../depends .
 cp -rs ../intrin .
-make -f Makefile_rx_demo_io_linux_pipe.mk USE_PCM=0 USE_AMDuPROF=0
+make -f Makefile_rx_demo_io_linux_pipe.mk USE_PCM=0 USE_AMDuPROF=0 CC=$4 CXX=$5
 if [ $? -ne 0 ]; then
         echo "Make Failed for Rx pipes"
         exit 1
 fi
-make -f Makefile_rx_demo_io_posix_shared_mem.mk USE_PCM=0 USE_AMDuPROF=0
+make -f Makefile_rx_demo_io_posix_shared_mem.mk USE_PCM=0 USE_AMDuPROF=0 CC=$4 CXX=$5
 if [ $? -ne 0 ]; then
         echo "Make Failed for Rx pipes"
         exit 1

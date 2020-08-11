@@ -4,17 +4,21 @@ TxSrc=rev1BB_transmitter
 BlockSize=32
 IO_FIFO_SIZE=128
 
+#Set the compiler to use here
+CC=clang
+CXX=clang++
+
 cyclopsASCIIDir=../submodules/cyclopsASCIILink
 # cyclopsASCIISharedMemDir=../submodules/cyclopsASCIILink-sharedMem
 
 curDir=`pwd`
 
-./runRxMultithreadGen.sh ${RxSrc} ${BlockSize} ${IO_FIFO_SIZE}
+./runRxMultithreadGen.sh ${RxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX}
 if [ $? -ne 0 ]; then
         echo "Gen Failed for Rx"
         exit 1
 fi
-./runTxMultithreadGen.sh ${TxSrc} ${BlockSize} ${IO_FIFO_SIZE}
+./runTxMultithreadGen.sh ${TxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX}
 if [ $? -ne 0 ]; then
         echo "Gen Failed for Tx"
         exit 1
@@ -37,7 +41,7 @@ cp cOut_${TxSrc}/*_parameters.h ${cyclopsASCIIDir}/src/vitisIncludes/.
 cd ${cyclopsASCIIDir}
 mkdir build
 cd build
-cmake ..
+cmake -D CMAKE_C_COMPILER=${CC} -D CMAKE_CXX_COMPILER=${CXX} ..
 if [ $? -ne 0 ]; then
         echo "cmake Failed for cyclopsASCII"
         exit 1
@@ -65,7 +69,7 @@ if [ ! -z "${cyclopsASCIISharedMemDir}" ]; then
     cd ${cyclopsASCIISharedMemDir}
     mkdir build
     cd build
-    cmake ..
+    cmake -D CMAKE_C_COMPILER=${CC} -D CMAKE_CXX_COMPILER=${CXX} ..
     if [ $? -ne 0 ]; then
             echo "cmake Failed for cyclopsASCII-sharedMem"
             exit 1

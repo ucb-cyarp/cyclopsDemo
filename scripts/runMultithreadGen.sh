@@ -1,7 +1,7 @@
 #!/bin/bash
 RxSrc=rev1BB_receiver
 TxSrc=rev1BB_transmitter
-BlockSize=32
+BlockSize=64
 IO_FIFO_SIZE=128
 
 #Set the compiler to use here

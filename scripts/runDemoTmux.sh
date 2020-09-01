@@ -7,7 +7,7 @@ TxSrc=rev1BB_transmitter
 cyclopsASCIIDir=../../submodules/cyclopsASCIILink
 uhdToPipesDir=../../submodules/uhdToPipes
 dummyAdcDacDir=../../dummyAdcDac
-BlockSize=32
+BlockSize=64
 
 if [ -z $1 ]; then
     USE_DUMMY=0

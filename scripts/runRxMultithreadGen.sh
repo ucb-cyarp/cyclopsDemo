@@ -7,8 +7,10 @@ if [ $? -ne 0 ]; then
 fi
 OUT_DIR=cOut_$1
 mkdir ${OUT_DIR}
-#./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} rx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength 7 --ioFifoSize $3 --partitionMap [8,8,9]
-./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} rx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength 7 --ioFifoSize $3 --partitionMap [8,8,9] --printTelem --telemDumpPrefix telemDump_
+#./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} rx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength 7 --ioFifoSize $3 --partitionMap [12,12,13,14,15,16,17,18,19,20,21,22]
+./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} rx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength 7 --ioFifoSize $3 --partitionMap [12,12,13,14,15,16,17,18,19,20,21,23] --printTelem --telemDumpPrefix telemDump_
+#./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} rx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength 7 --ioFifoSize $3 --partitionMap [12,12,13,14,15,16,17,18,19,20,21,23] --telemDumpPrefix telemDump_
+
 if [ $? -ne 0 ]; then
         echo "Multithread Gen Failed for Rx"
         exit 1

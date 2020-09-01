@@ -40,7 +40,7 @@ If you are planning on using the web based telemetry visualizer, you will need t
 # Running the Demo
 1. Execute one of the following:
     - To run with the USRP, use ```./runDemoTmux.sh```
-    - To run with the Dummy ADC/DAC, use ```./runDemoTmux.sh```
+    - To run with the Dummy ADC/DAC, use ```./runDemoTmux.sh 1```
 2. Switch to the demo if you are launching from tmux by pressing Ctrl-b + ")"
 
 ## Cleanup the Demo

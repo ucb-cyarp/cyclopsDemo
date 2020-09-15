@@ -9,7 +9,7 @@ OUT_DIR=cOut_$1
 mkdir ${OUT_DIR}
 #./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} tx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength 7 --ioFifoSize $3 --partitionMap [8,8,9,10]
 #./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} tx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength 7 --ioFifoSize $3 --partitionMap [8,8,9,10] --printTelem
-./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} tx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength 7 --ioFifoSize $3 --partitionMap [8,8,9,10] --printTelem --telemDumpPrefix telemDump_
+./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} tx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength 7 --ioFifoSize $3 --partitionMap [8,8,9,10] --printTelem --telemDumpPrefix telemDump_ --emitPAPITelem
 if [ $? -ne 0 ]; then
         echo "Multithread Gen Failed for Tx"
         exit 1

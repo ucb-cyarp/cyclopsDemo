@@ -2,12 +2,12 @@
 # Inspired by https://stackoverflow.com/questions/5447278/bash-scripts-with-tmux-to-launch-a-4-paned-window
 # but used a lot of tmux forum splunking, manpage reading, and various user's tmux
 
-RxSrc=rx_rate_transition
-TxSrc=transmitter_rate_transition
-cyclopsASCIIDir=~/multirate-demo/cyclopsASCIILink
-uhdToPipesDir=~/multirate-demo/uhdToPipes
-dummyAdcDacDir=~/multirate-demo/cyclopsDemo/dummyAdcDac
-BlockSize=32
+RxSrc=rev1BB_receiver
+TxSrc=rev1BB_transmitter
+cyclopsASCIIDir=../../submodules/cyclopsASCIILink
+uhdToPipesDir=../../submodules/uhdToPipes
+dummyAdcDacDir=../../dummyAdcDac
+BlockSize=64
 
 if [ -z $1 ]; then
     USE_DUMMY=0
@@ -20,14 +20,14 @@ TxTokens=10
 txPer=1.0
 
 vitisFromADCPipe="rx/input_bundle_1.pipe"
-vitisFromRxPipe="rx/output_bundle_2.pipe"
+vitisFromRxPipe="rx/output_bundle_1.pipe"
 
 vitisToTxPipe="tx/input_bundle_1.pipe"
-vitisToDACPipe="tx/output_bundle_2.pipe"
+vitisToDACPipe="tx/output_bundle_1.pipe"
 
-uhdCPU=2
-txCPU=3
-rxCPU=18
+uhdCPU=4
+txCPU=5
+rxCPU=6
 
 usrpArgs="addr=192.168.40.2"
 Freq=5800000000

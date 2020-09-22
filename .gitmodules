@@ -1,0 +1,18 @@
+[submodule "submodules/cyclopsASCIILink"]
+	path = submodules/cyclopsASCIILink
+	url = git@github.com:ucb-cyarp/cyclopsASCIILink.git
+[submodule "submodules/vitisTelemetryDash"]
+	path = submodules/vitisTelemetryDash
+	url = git@github.com:ucb-cyarp/vitisTelemetryDash.git
+[submodule "submodules/uhdToPipes"]
+	path = submodules/uhdToPipes
+	url = git@github.com:ucb-cyarp/uhdToPipes.git
+[submodule "submodules/vitis"]
+	path = submodules/vitis
+	url = git@github.com:ucb-cyarp/vitis.git
+[submodule "submodules/cyclopsASCIILink-sharedMem"]
+	path = submodules/cyclopsASCIILink-sharedMem
+	url = git@github.com:ucb-cyarp/cyclopsASCIILink.git
+[submodule "submodules/benchmarking"]
+	path = submodules/benchmarking
+	url = git@github.com:ucb-cyarp/benchmarking.git

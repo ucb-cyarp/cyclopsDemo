@@ -2,11 +2,11 @@
 # Inspired by https://stackoverflow.com/questions/5447278/bash-scripts-with-tmux-to-launch-a-4-paned-window
 # but used a lot of tmux forum splunking, manpage reading, and various user's tmux
 
-RxSrc=rx_rate_transition
-TxSrc=transmitter_rate_transition
-cyclopsASCIIDir=~/multirate-demo/cyclopsASCIILink-sharedMem
-uhdToPipesDir=~/multirate-demo/uhdToPipes
-dummyAdcDacDir=~/multirate-demo/cyclopsDemo/dummyAdcDacSharedMemFIFO
+RxSrc=rev1BB_receiver
+TxSrc=rev1BB_transmitter
+cyclopsASCIIDir=../submodules/cyclopsASCIILink-sharedMem
+uhdToPipesDir=../submodules/uhdToPipes
+dummyAdcDacDir=../dummyAdcDacSharedMemFIFO
 BlockSize=32
 IO_FIFO_SIZE=128
 

@@ -5,13 +5,31 @@ BlockSize=64
 IO_FIFO_SIZE=128
 
 #Set the compiler to use here
-CC=clang
-CXX=clang++
+source ./setCompilersToUse.sh
+
+compilerInfoName="compilerInfo.txt"
 
 cyclopsASCIIDir=../submodules/cyclopsASCIILink
 # cyclopsASCIISharedMemDir=../submodules/cyclopsASCIILink-sharedMem
 
 curDir=`pwd`
+
+#Save Compiler Info
+echo "Compilers Specified:" > $compilerInfoName
+echo "CC=$CC" >> $compilerInfoName
+echo "CXX=$CXX" >> $compilerInfoName
+echo >> $compilerInfoName
+echo "Compiler Locations:" >> $compilerInfoName
+echo "CC: $(which $CC)" >> $compilerInfoName
+echo "CXX: $(which $CXX)" >> $compilerInfoName
+echo >> $compilerInfoName
+echo "Compiler Config:" >> $compilerInfoName
+echo "CC:" >> $compilerInfoName
+$CC -v &>> $compilerInfoName
+echo "CXX:" >> $compilerInfoName
+$CXX -v &>> $compilerInfoName
+
+#Generate
 
 ./runRxMultithreadGen.sh ${RxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX}
 if [ $? -ne 0 ]; then

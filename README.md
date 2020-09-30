@@ -1,6 +1,7 @@
 # cyclopsDemo
 Support Files for Cyclops Vitis Demo
 
+
  - [Install (Automatic)](#install-automatic)
  - [Installing Dependencies for Visualization](#installing-dependencies-for-visualization)
  - [Running the Demo (Interactive)](#running-the-demo-interactive)

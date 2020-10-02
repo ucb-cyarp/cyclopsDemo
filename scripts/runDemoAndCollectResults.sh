@@ -18,4 +18,6 @@ sleep $timeToWait
 
 ./cleanupDemo.sh
 
+sleep 2s
+
 ./collectRunResults.sh $tgtDir

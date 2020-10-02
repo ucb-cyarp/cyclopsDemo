@@ -3,16 +3,7 @@
 
 curDir=`pwd`
 
-#Try sigint to hopefully close log files
-pkill -f benchmark_tx_demo_io_linux_pipe --signal SIGINT
-pkill -f benchmark_rx_demo_io_linux_pipe --signal SIGINT
-pkill -f uhdToPipes --signal SIGINT
-pkill -f cyclopsASCIILink --signal SIGINT
-pkill -f dummyAdcDac --signal SIGINT
-
-sleep 2s
-
-#Kill more forcefully
+#Kill processes
 pkill -f benchmark_tx_demo_io_linux_pipe
 pkill -f benchmark_rx_demo_io_linux_pipe
 pkill -f uhdToPipes

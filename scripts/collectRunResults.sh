@@ -119,6 +119,16 @@ for genDirName in ${generatedDirNames[@]}
 do
     echo "    Copying $genDirName"
     cp -r --no-dereference $buildDir/$genDirName ./genSrc/.
+
+    #Remove links from src
+    filesInSrc=$(find ./genSrc/$genDirName)
+    for f in $filesInSrc
+    do
+        if [[ -L "$f" ]]; then
+            echo "    Removed Symlink from src: $f"
+            rm $f
+        fi
+    done
 done
 
 #Copy Scripts

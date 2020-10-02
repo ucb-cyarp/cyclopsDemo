@@ -11,6 +11,7 @@
 # https://stackoverflow.com/questions/35006457/choosing-between-0-and-bash-source
 # https://stackoverflow.com/questions/9405478/command-substitution-backticks-or-dollar-sign-paren-enclosed
 # https://superuser.com/questions/112078/delete-matching-files-in-all-subdirectories
+# https://unix.stackexchange.com/questions/16640/how-can-i-get-the-size-of-a-file-in-a-bash-script
 
 timestamp=$(date)
 
@@ -98,6 +99,16 @@ do
     if [[ -p "$f" ]]; then
         echo "    Removed Named Pipe from Results: $f"
         rm $f
+    fi
+done
+
+#Check results for empty log
+filesInResults=$(find results)
+for f in $filesInResults
+do
+    size=$(stat --printf="%s" $f)
+    if [[ size -eq 0 ]]; then
+        echo "    WARNING: Log file with no contents: $f"
     fi
 done
 

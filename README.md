@@ -12,6 +12,7 @@ Support Files for Cyclops Vitis Demo
    - [Viewing the Dashboard](#viewing-the-dashboard)
    - [Stoping the Visualizer](#stoping-the-visualizer)
  - [Running the Demo and Collecting Results (Unattended)](#running-the-demo-and-collecting-results-unattended)
+ - [Running Unattended Benchmark](#running-unattended-benchmark)
  - [Appendix](#appendix)
    - [Install (Manual)](#install-manual)
    - [Creating a Build Directory from Scratch](#creating-a-build-directory-from-scratch)
@@ -105,6 +106,21 @@ To run a demo for a specified amount of time, cleanup the demo, and collect the 
 Replace `<reportName>` with the name of a directory/tar.gz file to store the results in.
 
 To change the amount of time the demo is allowed to run, modify the variable in `./runDemoAndCollectResults.sh`.
+
+# Running Unattended Benchmark
+The suggested procedure for running the benchmarks on multi-core platforms:
+1. Make any modifications to the cyclopsDemo src that you would like to test.  If modifying vitis, make sure to re-build it before proceeding.
+2. Build the demo binaries
+   ```
+   cd cyclopsDemo/build
+   ./build.sh
+   ```
+3. Reboot the system to bring it back to a known clean state
+4. Setup the platform (platform scripts assumed to be in `~/git/platformScripts`) and run the demo.  Replace path names with ones appropriate for your test
+   ```
+   cd ~/git/platformScripts; sudo ./setup.sh; cd ~/git/cyclopsDemo/build; ./runDemoAndCollectResults.sh results/cyclopsDemoResults
+   ```
+5. Results will be collected after 3 min and stored in the provided path
 
 # Appendix
 ## Install (Manual)

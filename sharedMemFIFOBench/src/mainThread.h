@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define SAMPLE_COMPONENT_DATATYPE float
+#define SAMPLE_COMPONENT_DATATYPE short
 #define SAMPLE_SIZE (sizeof(SAMPLE_COMPONENT_DATATYPE)*2)
 
 typedef struct{

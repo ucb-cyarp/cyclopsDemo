@@ -10,6 +10,8 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "helpers.h"
+
 #define TIME_DURATION (1.0)
 
 void* mainThread(void* uncastArgs){
@@ -43,29 +45,38 @@ void* mainThread(void* uncastArgs){
     }
 
     //If transmitting, allocate arrays and form a Tx packet
-    SAMPLE_COMPONENT_DATATYPE* sampBuffer = (SAMPLE_COMPONENT_DATATYPE*) malloc(sizeof(SAMPLE_COMPONENT_DATATYPE)*2*blockLen);
+    SAMPLE_COMPONENT_DATATYPE* sampBuffer = (SAMPLE_COMPONENT_DATATYPE*) malloc(sizeof(SAMPLE_COMPONENT_DATATYPE)*2*blockLen); //Assume sending complex samples
+    for(int i = 0; i<2*blockLen; i++){ //Assume sending complex sample
+        sampBuffer[i]=0;
+    }
 
     int flushCounter = 0;
 
     uint64_t samplesRecv = 0;
     uint64_t samplesSent = 0;
 
-    time_t recvStartTime;
-    time_t sendStartTime;
+    timespec_t recvStartTime;
+    timespec_t sendStartTime;
 
-    time_t lastRecvPrint;
-    time_t lastSendPrint;
+    timespec_t lastRecvPrint;
+    timespec_t lastSendPrint;
 
     //Main Loop
     bool running = true;
-    while(running){
-        if(rxPipe != NULL) {
+
+    printf("Sample Size: %ld bytes\n", sizeof(SAMPLE_COMPONENT_DATATYPE) * 2); //Assume sending complex samples
+    printf("Block Size: %d samples\n", blockLen);
+    printf("Flush Period: %d Transmissions\n", flushPeriod);
+
+    if(rxPipe != NULL) {
+        asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+        clock_gettime(CLOCK_MONOTONIC, &recvStartTime);
+        asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+        lastRecvPrint = recvStartTime;
+
+        while(running){
             //Get samples from rx pipe (ok to block)
             int samplesRead = fread(sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, rxPipe);
-            if(samplesRecv == 0){
-                recvStartTime = time(NULL);
-                lastRecvPrint = recvStartTime;
-            }
             if (samplesRead != blockLen && feof(rxPipe)) {
                 //Done!
                 running = false;
@@ -81,22 +92,42 @@ void* mainThread(void* uncastArgs){
 
             samplesRecv+=samplesRead;
 
-            time_t currentTime = time(NULL);
-            double duration = difftime(currentTime, lastRecvPrint);
+            //Need to make sure that the memory copy is not optimized out if the content is not checked
+            asm volatile(""
+            :
+            : "r" (*(const SAMPLE_COMPONENT_DATATYPE (*)[]) sampBuffer) //See https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html for information for "string memory arguments"
+            :);
+
+            timespec_t currentTime;
+            asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+            clock_gettime(CLOCK_MONOTONIC, &currentTime);
+            asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+
+            double duration = difftimespec(&currentTime, &lastRecvPrint);
             if(duration >= TIME_DURATION){
                 lastRecvPrint = currentTime;
-                double totalDuration = difftime(currentTime, recvStartTime);
+                double totalDuration = difftimespec(&currentTime, &recvStartTime);
                 double msps = samplesRecv/totalDuration/1000000.0;
-                printf("Recv Rate %f Msps\n", msps);
+                double nsPerSample = totalDuration*1.0e9/samplesRecv;
+                printf("Recv Rate: %f Msps, ns Per Sample: %f\n", msps, nsPerSample);
             }
         }
+    }
 
-        if(txPipe != NULL) {
+    if(txPipe != NULL) {
+        asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+        clock_gettime(CLOCK_MONOTONIC, &sendStartTime);
+        asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+        lastSendPrint = sendStartTime;
+
+        while(running){
+            asm volatile(""
+                : "+m" (*sampBuffer) //See https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html for information for "string memory arguments"
+                : 
+                :);
+                
             //Write samples to tx pipe (ok to block)
             fwrite(sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, txPipe);
-            if(samplesSent == 0){
-                sendStartTime = time(NULL);
-            }
             samplesSent+=blockLen;
 
             if(flushCounter >= flushPeriod){
@@ -106,13 +137,18 @@ void* mainThread(void* uncastArgs){
                 flushCounter++;
             }
 
-            time_t currentTime = time(NULL);
-            double duration = difftime(currentTime, lastSendPrint);
+            timespec_t currentTime;
+            asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+            clock_gettime(CLOCK_MONOTONIC, &currentTime);
+            asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+
+            double duration = difftimespec(&currentTime, &lastSendPrint);
             if(duration >= TIME_DURATION){
                 lastSendPrint = currentTime;
-                double totalDuration = difftime(currentTime, sendStartTime);
+                double totalDuration = difftimespec(&currentTime, &sendStartTime);
                 double msps = samplesSent/totalDuration/1000000.0;
-                printf("Send Rate %f Msps\n", msps);
+                double nsPerSample = totalDuration*1.0e9/samplesSent;
+                printf("Send Rate: %f Msps, ns Per Sample: %f\n", msps, nsPerSample);
             }
         }
     }

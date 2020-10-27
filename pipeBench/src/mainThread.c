@@ -92,6 +92,12 @@ void* mainThread(void* uncastArgs){
 
             samplesRecv+=samplesRead;
 
+            //Need to make sure that the memory copy is not optimized out if the content is not checked
+            asm volatile(""
+            :
+            : "r" (*(const SAMPLE_COMPONENT_DATATYPE (*)[]) sampBuffer) //See https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html for information for "string memory arguments"
+            :);
+
             timespec_t currentTime;
             asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
             clock_gettime(CLOCK_MONOTONIC, &currentTime);
@@ -115,6 +121,11 @@ void* mainThread(void* uncastArgs){
         lastSendPrint = sendStartTime;
 
         while(running){
+            asm volatile(""
+                : "+m" (*sampBuffer) //See https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html for information for "string memory arguments"
+                : 
+                :);
+                
             //Write samples to tx pipe (ok to block)
             fwrite(sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, txPipe);
             samplesSent+=blockLen;

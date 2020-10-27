@@ -22,6 +22,8 @@ set(CMAKE_C_STANDARD 11)
 set(COMMON_SRCS
         src/mainThread.c
         src/mainThread.h
+        src/helpers.c
+        src/helpers.h
         src/depends/BerkeleySharedMemoryFIFO.c
         src/depends/BerkeleySharedMemoryFIFO.h)
 

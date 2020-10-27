@@ -16,6 +16,14 @@ fi
 echo "Letting run for $timeToWait"
 sleep $timeToWait
 
-./cleanupDemo.sh
+./suspendDemo.sh
+
+sleep 1s
+
+#Collect results first
 
 ./collectRunResults.sh $tgtDir
+
+#Then cleanup to avoid issues with log files potentially being zero-ed out after process killed
+
+./cleanupDemo.sh

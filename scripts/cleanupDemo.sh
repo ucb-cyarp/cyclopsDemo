@@ -3,9 +3,10 @@
 
 curDir=`pwd`
 
-pkill -f uhdToPipes
+#Kill processes
 pkill -f benchmark_tx_demo_io_linux_pipe
 pkill -f benchmark_rx_demo_io_linux_pipe
+pkill -f uhdToPipes
 pkill -f cyclopsASCIILink
 pkill -f dummyAdcDac
 

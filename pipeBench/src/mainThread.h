@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define SAMPLE_COMPONENT_DATATYPE float
+#define SAMPLE_COMPONENT_DATATYPE short
 
 typedef struct{
     char *txPipeName;

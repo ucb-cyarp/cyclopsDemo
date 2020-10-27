@@ -7,7 +7,12 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <time.h>
 
 bool isReadyForReading(FILE* file);
+
+typedef struct timespec timespec_t;
+
+double difftimespec(timespec_t* a, timespec_t* b);
 
 #endif //PIPEBENCH_HELPERS_H

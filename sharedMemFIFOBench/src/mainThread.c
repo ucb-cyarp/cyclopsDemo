@@ -13,9 +13,13 @@
 #include <stdatomic.h>
 #include <unistd.h>
 
+#include "helpers.h"
+
 #include "depends/BerkeleySharedMemoryFIFO.h"
 
 #define TIME_DURATION (1.0)
+
+// #define CHECK_CONTENTS
 
 void* mainThread(void* uncastArgs){
     threadArgs_t* args = (threadArgs_t*) uncastArgs;
@@ -46,11 +50,11 @@ void* mainThread(void* uncastArgs){
     uint64_t samplesRecv = 0;
     uint64_t samplesSent = 0;
 
-    time_t recvStartTime;
-    time_t sendStartTime;
+    timespec_t recvStartTime;
+    timespec_t sendStartTime;
 
-    time_t lastRecvPrint;
-    time_t lastSendPrint;
+    timespec_t lastRecvPrint;
+    timespec_t lastSendPrint;
 
     //Main Loop
     bool running = true;
@@ -58,67 +62,100 @@ void* mainThread(void* uncastArgs){
     SAMPLE_COMPONENT_DATATYPE rxFifoExpectedVal = 0;
     SAMPLE_COMPONENT_DATATYPE txFifoExpectedVal = 0;
 
-    while(running){
-        if(rxSharedName != NULL) {
-            //Get samples from rx pipe (ok to block)
+    for(int i = 0; i<blockLen; i++){
+        sampBuffer[i*2] = 0;
+        sampBuffer[i*2+1] = 0;
+    }
 
+    printf("Sample Size: %ld bytes\n", sizeof(SAMPLE_COMPONENT_DATATYPE) * 2); //Assume sending complex samples
+    printf("Block Size: %d samples\n", blockLen);
+    
+    if(rxSharedName != NULL) {
+        asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+        clock_gettime(CLOCK_MONOTONIC, &recvStartTime);
+        asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+        lastRecvPrint = recvStartTime;
+
+        while(running){
+            //Get samples from rx pipe (ok to block)
             int samplesRead = readFifo( sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, &sharedMemoryFifo);
-            if(samplesRecv == 0){
-                recvStartTime = time(NULL);
-                lastRecvPrint = recvStartTime;
-            }
             if (samplesRead != blockLen) {
                 //TODO: Need to include method to determine when finished.  Right now, this should never happen and will block indefinatly
                 //Done!
                 running = false;
                 break;
             }
-
             samplesRecv+=samplesRead;
 
-            time_t currentTime = time(NULL);
-            double duration = difftime(currentTime, lastRecvPrint);
+            #ifdef CHECK_CONTENTS
+                //Verify FIFO recv values
+                for(int i = 0; i<blockLen; i++){
+                    if(sampBuffer[i*2] != rxFifoExpectedVal || sampBuffer[i*2+1] != rxFifoExpectedVal){
+                        printf("FIFO ERROR!");
+                        exit(1);
+                    }
+                }
+                rxFifoExpectedVal += 1;
+            #else
+                //Need to make sure that the memory copy is not optimized out if the content is not checked
+                asm volatile(""
+                :
+                : "r" (*(const SAMPLE_COMPONENT_DATATYPE (*)[]) sampBuffer) //See https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html for information for "string memory arguments"
+                :);
+            #endif
+
+            timespec_t currentTime;
+            asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+            clock_gettime(CLOCK_MONOTONIC, &currentTime);
+            asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+
+            double duration = difftimespec(&currentTime, &lastRecvPrint);
             if(duration >= TIME_DURATION){
                 lastRecvPrint = currentTime;
-                double totalDuration = difftime(currentTime, recvStartTime);
+                double totalDuration = difftimespec(&currentTime, &recvStartTime);
                 double msps = samplesRecv/totalDuration/1000000.0;
-                printf("Recv Rate %f Msps\n", msps);
+                double nsPerSample = totalDuration*1.0e9/samplesRecv;
+                printf("Recv Rate: %f Msps, ns Per Sample: %f\n", msps, nsPerSample);
             }
-
-            //Verify FIFO recv values
-            //TODO: comment out for accurate speed
-            for(int i = 0; i<blockLen; i++){
-                if(sampBuffer[i*2] != rxFifoExpectedVal || sampBuffer[i*2+1] != rxFifoExpectedVal){
-                    printf("FIFO ERROR!");
-                    exit(1);
-                }
-            }
-            rxFifoExpectedVal += 1;
         }
+    }
 
-        if(txSharedName != NULL) {
+    if(txSharedName != NULL) {
+        asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+        clock_gettime(CLOCK_MONOTONIC, &sendStartTime);
+        asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+        lastSendPrint = sendStartTime;
 
-            //TODO: comment out for accurate speed
-            for(int i = 0; i<blockLen; i++){
-                sampBuffer[i*2] = txFifoExpectedVal;
-                sampBuffer[i*2+1] = txFifoExpectedVal;
-            }
-            txFifoExpectedVal += 1;
+        while(running){
+            #ifdef CHECK_CONTENTS
+                for(int i = 0; i<blockLen; i++){
+                    sampBuffer[i*2] = txFifoExpectedVal;
+                    sampBuffer[i*2+1] = txFifoExpectedVal;
+                }
+                txFifoExpectedVal += 1;
+            #else
+                asm volatile(""
+                : "+m" (*sampBuffer) //See https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html for information for "string memory arguments"
+                : 
+                :);
+            #endif
 
             //Write samples to tx pipe (ok to block)
             writeFifo(sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, &sharedMemoryFifo);
-            if(samplesSent == 0){
-                sendStartTime = time(NULL);
-            }
             samplesSent+=blockLen;
 
-            time_t currentTime = time(NULL);
-            double duration = difftime(currentTime, lastSendPrint);
+            timespec_t currentTime;
+            asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+            clock_gettime(CLOCK_MONOTONIC, &currentTime);
+            asm volatile ("" ::: "memory"); //Stop Re-ordering of timer
+
+            double duration = difftimespec(&currentTime, &lastSendPrint);
             if(duration >= TIME_DURATION){
                 lastSendPrint = currentTime;
-                double totalDuration = difftime(currentTime, sendStartTime);
+                double totalDuration = difftimespec(&currentTime, &sendStartTime);
                 double msps = samplesSent/totalDuration/1000000.0;
-                printf("Send Rate %f Msps\n", msps);
+                double nsPerSample = totalDuration*1.0e9/samplesSent;
+                printf("Send Rate: %f Msps, ns Per Sample: %f\n", msps, nsPerSample);
             }
         }
     }

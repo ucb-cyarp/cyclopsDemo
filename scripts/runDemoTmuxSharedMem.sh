@@ -4,10 +4,10 @@
 
 RxSrc=rev1BB_receiver
 TxSrc=rev1BB_transmitter
-cyclopsASCIIDir=../submodules/cyclopsASCIILink-sharedMem
-uhdToPipesDir=../submodules/uhdToPipes
-dummyAdcDacDir=../dummyAdcDacSharedMemFIFO
-BlockSize=32
+cyclopsASCIIDir=../../submodules/cyclopsASCIILink
+uhdToPipesDir=../../submodules/uhdToPipes
+dummyAdcDacDir=../../dummyAdcDac
+BlockSize=64
 IO_FIFO_SIZE=128
 
 if [ -z $1 ]; then
@@ -27,12 +27,13 @@ vitisFromRxPipe="rx_demo_output_bundle_2"
 vitisToTxPipe="tx_demo_input_bundle_1"
 vitisToDACPipe="tx_demo_output_bundle_2"
 
-uhdCPU=2
-txCPU=3
-rxCPU=18
+uhdCPU=4
+txCPU=5
+rxCPU=6
+
 usrpArgs="addr=192.168.40.2"
 Freq=5800000000
-Rate=1000000
+Rate=4000000
 TxGainDB=30
 RxGainDB=30
 txChan=0

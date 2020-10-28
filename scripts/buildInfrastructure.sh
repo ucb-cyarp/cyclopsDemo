@@ -4,14 +4,6 @@
 # Only builds directories if build directory does not exist (with the exception of benchmarking/common which it always tries to build)
 # Only builds uhdToPipes if uhd in path
 
-buildSharedMem=false
-while getopts ::a option; do
-    case $option in
-        a) buildSharedMem=true;;
-        ?) echo "Unknown option: $option"; exit 1;;
-    esac
-done
-
 oldDir=$(pwd)
 
 #Get build dir
@@ -63,6 +55,24 @@ fi
 # else
 #     echo "**** NOTE: To build shared memory, run script with -a flag ****"
 # fi
+
+if [[ ! -e $buildDir/../dummyAdcDac/build ]]; then
+    echo "#### Building dummyAdcDac ####"
+    cd $buildDir/../dummyAdcDac
+    mkdir build
+    cd build
+    cmake -D CMAKE_C_COMPILER=$CC -D CMAKE_CXX_COMPILER=$CXX ..
+    make
+fi
+
+if [[ ! -e $buildDir/../dummyAdcDacSharedMemFIFO/build ]]; then
+    echo "#### Building dummyAdcDacSharedMemFIFO ####"
+    cd $buildDir/../dummyAdcDacSharedMemFIFO
+    mkdir build
+    cd build
+    cmake -D CMAKE_C_COMPILER=$CC -D CMAKE_CXX_COMPILER=$CXX ..
+    make
+fi
 
 if [[ ! -e $buildDir/../submodules/uhdToPipes/build && ! -z $(which uhd_usrp_probe) ]]; then
     echo "#### Building uhdToPipes ####"

@@ -10,7 +10,7 @@ source ./setCompilersToUse.sh
 compilerInfoName="compilerInfo.txt"
 
 cyclopsASCIIDir=../submodules/cyclopsASCIILink
-# cyclopsASCIISharedMemDir=../submodules/cyclopsASCIILink-sharedMem
+cyclopsASCIISharedMemDir=../submodules/cyclopsASCIILink-sharedMem
 
 curDir=`pwd`
 

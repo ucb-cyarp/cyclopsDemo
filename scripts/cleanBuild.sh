@@ -73,9 +73,24 @@ if [[ -e $buildDir/../submodules/cyclopsASCIILink-sharedMem/build ]]; then
     rm -r $buildDir/../submodules/cyclopsASCIILink-sharedMem/build
 fi
 
+if [[ -e $buildDir/../dummyAdcDac/build ]]; then
+    echo "Removed dummyAdcDac/build"
+    rm -r $buildDir/../dummyAdcDac/build
+fi
+
+if [[ -e $buildDir/../dummyAdcDacSharedMemFIFO/build ]]; then
+    echo "Removed dummyAdcDacSharedMemFIFO/build"
+    rm -r $buildDir/../dummyAdcDacSharedMemFIFO/build
+fi
+
 if [[ -e $buildDir/../submodules/uhdToPipes/build ]]; then
     echo "Removed uhdToPipes/build"
     rm -r $buildDir/../submodules/uhdToPipes/build
+fi
+
+if [[ -e $buildDir/../sharedMemFIFOBench/build ]]; then
+    echo "Removed sharedMemFIFOBench/build"
+    rm -r $buildDir/../sharedMemFIFOBench/build
 fi
 
 if [[ $cleanVitis == true ]]; then

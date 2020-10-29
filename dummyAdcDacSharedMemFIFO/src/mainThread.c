@@ -32,8 +32,15 @@ void* mainThread(void* uncastArgs){
     initSharedMemoryFIFO(&txfbFifo);
     initSharedMemoryFIFO(&rxFifo);
 
-    size_t fifoBufferSizeBytes = SAMPLE_SIZE*fifoSizeBlocks*blockLen;
-    size_t txfbFifoBufferSizeBytes = sizeof(FEEDBACK_DATATYPE)*fifoSizeBlocks;
+    size_t fifoBufferBlockSizeBytes = SAMPLE_SIZE*blockLen;
+    size_t fifoBufferSizeBytes = fifoBufferBlockSizeBytes*fifoSizeBlocks;
+    size_t txfbFifoBufferBlockSizeBytes = sizeof(FEEDBACK_DATATYPE); //This does not get sent in blocks, it gets sent as a single FEEDBACK_DATATYPE per transaction
+    size_t txfbFifoBufferSizeBytes = txfbFifoBufferBlockSizeBytes*fifoSizeBlocks;
+
+    // printf("FIFO Block Size (Samples): %d\n", blockLen);
+    // printf("FIFO Block Size (Bytes): %d\n", fifoBufferBlockSizeBytes);
+    // printf("FIFO Buffer Size (Samples): %d\n", fifoSizeBlocks);
+    // printf("FIFO Buffer Size (Bytes): %d\n", fifoBufferSizeBytes);
 
     //Initialize Producer FIFOs first to avoid deadlock
     //Note, producer fifos block on consumer joining durring the first write
@@ -49,8 +56,8 @@ void* mainThread(void* uncastArgs){
     while(running){
         //Get samples from rx pipe (ok to block)
         // printf("About to read samples\n");
-        int samplesRead = readFifo(sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, &txFifo);
-        if (samplesRead != blockLen) {
+        int samplesRead = readFifo(sampBuffer, fifoBufferBlockSizeBytes, 1, &txFifo);
+        if (samplesRead != 1) {
             //Done!
             running = false;
             break;
@@ -65,11 +72,11 @@ void* mainThread(void* uncastArgs){
 
         //Write samples to tx pipe (ok to block)
         // printf("About to write samples\n");
-        writeFifo(sampBuffer, sizeof(SAMPLE_COMPONENT_DATATYPE) * 2, blockLen, &rxFifo);
+        writeFifo(sampBuffer, fifoBufferBlockSizeBytes, 1, &rxFifo);
         // printf("Wrote samples\n");
         // printf("About to write token\n");
         FEEDBACK_DATATYPE tokensReturned = 1;
-        writeFifo(&tokensReturned, sizeof(tokensReturned), 1, &txfbFifo);
+        writeFifo(&tokensReturned, txfbFifoBufferBlockSizeBytes, 1, &txfbFifo);
         // printf("Wrote token\n");
     }
 

@@ -4,9 +4,9 @@
 
 RxSrc=rev1BB_receiver
 TxSrc=rev1BB_transmitter
-cyclopsASCIIDir=../../submodules/cyclopsASCIILink
+cyclopsASCIIDir=../../submodules/cyclopsASCIILink-sharedMem
 uhdToPipesDir=../../submodules/uhdToPipes
-dummyAdcDacDir=../../dummyAdcDac
+dummyAdcDacDir=../../dummyAdcDacSharedMemFIFO
 BlockSize=64
 IO_FIFO_SIZE=128
 
@@ -22,10 +22,10 @@ txPer=1.0
 
 ProcessLimitCyclops=10
 vitisFromADCPipe="rx_demo_input_bundle_1"
-vitisFromRxPipe="rx_demo_output_bundle_2"
+vitisFromRxPipe="rx_demo_output_bundle_1"
 
 vitisToTxPipe="tx_demo_input_bundle_1"
-vitisToDACPipe="tx_demo_output_bundle_2"
+vitisToDACPipe="tx_demo_output_bundle_1"
 
 uhdCPU=4
 txCPU=5

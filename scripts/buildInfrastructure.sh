@@ -83,6 +83,16 @@ if [[ ! -e $buildDir/../submodules/uhdToPipes/build && ! -z $(which uhd_usrp_pro
     make
 fi
 
+#Used for cleaning shared memory demo
+if [[ ! -e $buildDir/../sharedMemFIFOBench/build ]]; then
+    echo "#### Building sharedMemFIFOBench ####"
+    cd $buildDir/../sharedMemFIFOBench
+    mkdir build
+    cd build
+    cmake -D CMAKE_C_COMPILER=$CC -D CMAKE_CXX_COMPILER=$CXX ..
+    make
+fi
+
 echo "#### Running make on benchmarking/common ####"
 cd $buildDir/../submodules/benchmarking/common
 echo "make CC=$CC CXX=$CXX USE_PCM=0 USE_AMDuPROF=0"

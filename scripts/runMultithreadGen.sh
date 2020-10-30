@@ -12,6 +12,11 @@ compilerInfoName="compilerInfo.txt"
 cyclopsASCIIDir=../submodules/cyclopsASCIILink
 # cyclopsASCIISharedMemDir=../submodules/cyclopsASCIILink-sharedMem
 
+if [[ $(uname) == "Darwin" ]]; then
+        echo "POSIX Shared Memory Version Cannot be Built on MacOS"
+        cyclopsASCIISharedMemDir=
+fi
+
 curDir=`pwd`
 
 #Save Compiler Info
@@ -25,9 +30,9 @@ echo "CXX: $(which $CXX)" >> $compilerInfoName
 echo >> $compilerInfoName
 echo "Compiler Config:" >> $compilerInfoName
 echo "CC:" >> $compilerInfoName
-$CC -v &>> $compilerInfoName
+$CC -v > $compilerInfoName 2>&1
 echo "CXX:" >> $compilerInfoName
-$CXX -v &>> $compilerInfoName
+$CXX -v > $compilerInfoName 2>&1
 
 #Generate
 

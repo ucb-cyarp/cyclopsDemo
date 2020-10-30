@@ -65,7 +65,9 @@ if [[ ! -e $buildDir/../dummyAdcDac/build ]]; then
     make
 fi
 
-if [[ ! -e $buildDir/../dummyAdcDacSharedMemFIFO/build ]]; then
+if [[ $(uname) == "Darwin" ]]; then
+    echo "**** dummyAdcDacSharedMemFIFO cannot be built on MacOS ****"
+elif [[ ! -e $buildDir/../dummyAdcDacSharedMemFIFO/build ]]; then
     echo "#### Building dummyAdcDacSharedMemFIFO ####"
     cd $buildDir/../dummyAdcDacSharedMemFIFO
     mkdir build

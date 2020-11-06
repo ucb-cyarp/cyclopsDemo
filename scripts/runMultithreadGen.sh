@@ -64,7 +64,7 @@ cp cOut_${TxSrc}/*_parameters.h ${cyclopsASCIIDir}/src/vitisIncludes/.
 cd ${cyclopsASCIIDir}
 mkdir build
 cd build
-cmake -D CMAKE_C_COMPILER=${CC} -D CMAKE_CXX_COMPILER=${CXX} ..
+cmake -DBUILD_SHARED_MEM_VERSION=OFF -D CMAKE_C_COMPILER=${CC} -D CMAKE_CXX_COMPILER=${CXX} ..
 if [ $? -ne 0 ]; then
         echo "cmake Failed for cyclopsASCII"
         exit 1
@@ -92,7 +92,7 @@ if [ ! -z "${cyclopsASCIISharedMemDir}" ]; then
     cd ${cyclopsASCIISharedMemDir}
     mkdir build
     cd build
-    cmake -D CMAKE_C_COMPILER=${CC} -D CMAKE_CXX_COMPILER=${CXX} ..
+    cmake -DBUILD_SHARED_MEM_VERSION=ON -D CMAKE_C_COMPILER=${CC} -D CMAKE_CXX_COMPILER=${CXX} ..
     if [ $? -ne 0 ]; then
             echo "cmake Failed for cyclopsASCII-sharedMem"
             exit 1

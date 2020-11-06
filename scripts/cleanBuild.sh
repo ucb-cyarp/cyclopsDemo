@@ -88,6 +88,11 @@ if [[ -e $buildDir/../submodules/uhdToPipes/build ]]; then
     rm -r $buildDir/../submodules/uhdToPipes/build
 fi
 
+if [[ -e $buildDir/../sharedMemFIFOBench/build ]]; then
+    echo "Removed sharedMemFIFOBench/build"
+    rm -r $buildDir/../sharedMemFIFOBench/build
+fi
+
 if [[ $cleanVitis == true ]]; then
     if [[ -e $buildDir/../submodules/vitis/build ]]; then
         echo "Removed vitis/build"

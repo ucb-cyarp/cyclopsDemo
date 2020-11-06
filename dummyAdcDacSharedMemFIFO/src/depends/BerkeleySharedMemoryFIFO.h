@@ -36,6 +36,9 @@
 
 #ifndef BERKELEYSHAREDMEMORYFIFO_H
 #define BERKELEYSHAREDMEMORYFIFO_H
+#ifndef _DEFAULT_SOURCE
+#define _DEFAULT_SOURCE
+#endif
 
 #include <stdatomic.h>
 #include <semaphore.h>
@@ -51,8 +54,8 @@ typedef struct{
     sem_t *txSem;
     sem_t *rxSem;
     atomic_int_fast32_t* fifoCount;
-    volatile void* fifoBlock;
-    volatile void* fifoBuffer;
+    void* fifoBlock;
+    void* fifoBuffer;
     size_t fifoSizeBytes;
     size_t fifoSharedBlockSizeBytes;
     size_t currentOffset;

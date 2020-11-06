@@ -12,7 +12,7 @@ if [[ $(uname) == "Darwin" ]]; then
         #Cannot set thread affinity on MacOS
         partitionMap="[]" 
 else
-        partitionMap="[12,12,13,14,15,16,17,18,19,20,21,23]"
+        partitionMap="[12,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27]"
 fi
 
 #./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} rx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength 7 --ioFifoSize $3 --partitionMap ${partitionMap}

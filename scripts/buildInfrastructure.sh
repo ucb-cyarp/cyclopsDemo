@@ -65,7 +65,9 @@ if [[ ! -e $buildDir/../dummyAdcDac/build ]]; then
     make
 fi
 
-if [[ ! -e $buildDir/../dummyAdcDacSharedMemFIFO/build ]]; then
+if [[ $(uname) == "Darwin" ]]; then
+    echo "**** dummyAdcDacSharedMemFIFO cannot be built on MacOS ****"
+elif [[ ! -e $buildDir/../dummyAdcDacSharedMemFIFO/build ]]; then
     echo "#### Building dummyAdcDacSharedMemFIFO ####"
     cd $buildDir/../dummyAdcDacSharedMemFIFO
     mkdir build
@@ -77,6 +79,16 @@ fi
 if [[ ! -e $buildDir/../submodules/uhdToPipes/build && ! -z $(which uhd_usrp_probe) ]]; then
     echo "#### Building uhdToPipes ####"
     cd $buildDir/../submodules/uhdToPipes
+    mkdir build
+    cd build
+    cmake -D CMAKE_C_COMPILER=$CC -D CMAKE_CXX_COMPILER=$CXX ..
+    make
+fi
+
+#Used for cleaning shared memory demo
+if [[ ! -e $buildDir/../sharedMemFIFOBench/build ]]; then
+    echo "#### Building sharedMemFIFOBench ####"
+    cd $buildDir/../sharedMemFIFOBench
     mkdir build
     cd build
     cmake -D CMAKE_C_COMPILER=$CC -D CMAKE_CXX_COMPILER=$CXX ..

@@ -10,7 +10,12 @@ source ./setCompilersToUse.sh
 compilerInfoName="compilerInfo.txt"
 
 cyclopsASCIIDir=../submodules/cyclopsASCIILink
-# cyclopsASCIISharedMemDir=../submodules/cyclopsASCIILink-sharedMem
+cyclopsASCIISharedMemDir=../submodules/cyclopsASCIILink-sharedMem
+
+if [[ $(uname) == "Darwin" ]]; then
+        echo "POSIX Shared Memory Version Cannot be Built on MacOS"
+        cyclopsASCIISharedMemDir=
+fi
 
 curDir=`pwd`
 
@@ -25,9 +30,9 @@ echo "CXX: $(which $CXX)" >> $compilerInfoName
 echo >> $compilerInfoName
 echo "Compiler Config:" >> $compilerInfoName
 echo "CC:" >> $compilerInfoName
-$CC -v &>> $compilerInfoName
+$CC -v > $compilerInfoName 2>&1
 echo "CXX:" >> $compilerInfoName
-$CXX -v &>> $compilerInfoName
+$CXX -v > $compilerInfoName 2>&1
 
 #Generate
 
@@ -59,7 +64,7 @@ cp cOut_${TxSrc}/*_parameters.h ${cyclopsASCIIDir}/src/vitisIncludes/.
 cd ${cyclopsASCIIDir}
 mkdir build
 cd build
-cmake -D CMAKE_C_COMPILER=${CC} -D CMAKE_CXX_COMPILER=${CXX} ..
+cmake -DBUILD_SHARED_MEM_VERSION=OFF -D CMAKE_C_COMPILER=${CC} -D CMAKE_CXX_COMPILER=${CXX} ..
 if [ $? -ne 0 ]; then
         echo "cmake Failed for cyclopsASCII"
         exit 1
@@ -87,7 +92,7 @@ if [ ! -z "${cyclopsASCIISharedMemDir}" ]; then
     cd ${cyclopsASCIISharedMemDir}
     mkdir build
     cd build
-    cmake -D CMAKE_C_COMPILER=${CC} -D CMAKE_CXX_COMPILER=${CXX} ..
+    cmake -DBUILD_SHARED_MEM_VERSION=ON -D CMAKE_C_COMPILER=${CC} -D CMAKE_CXX_COMPILER=${CXX} ..
     if [ $? -ne 0 ]; then
             echo "cmake Failed for cyclopsASCII-sharedMem"
             exit 1

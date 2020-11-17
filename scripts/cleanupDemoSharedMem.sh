@@ -1,12 +1,29 @@
 #!/bin/bash
 # using https://stackoverflow.com/questions/1908610/how-to-get-pid-of-background-process
 
-cleaner=~/git/cyclopsDemo/sharedMemFIFOBench/build/cleanupShared
+oldDir=$(pwd)
+
+#Get build dir
+scriptSrc=$(dirname "${BASH_SOURCE[0]}")
+cd $scriptSrc
+scriptSrc=$(pwd)
+if [[ $(basename $scriptSrc) == scripts ]]; then
+    cd ../build
+    buildDir=$(pwd)
+elif [[ $(basename $scriptSrc) == build ]]; then
+    buildDir=$scriptSrc
+else
+    echo "Error: Unable to determine location of demo build directory"
+    cd $oldDir
+    exit 1
+fi
+
+cleaner=$buildDir/../sharedMemFIFOBench/build/cleanupShared
 
 vitisFromADCPipe="rx_demo_input_bundle_1"
-vitisFromRxPipe="rx_demo_output_bundle_2"
+vitisFromRxPipe="rx_demo_output_bundle_1"
 vitisToTxPipe="tx_demo_input_bundle_1"
-vitisToDACPipe="tx_demo_output_bundle_2"
+vitisToDACPipe="tx_demo_output_bundle_1"
 TxFeedbkAppPipeName="txFeedbkAppLayer"
 
 pkill -f uhdToPipes
@@ -20,3 +37,5 @@ ${cleaner} ${vitisFromRxPipe}
 ${cleaner} ${vitisToTxPipe}
 ${cleaner} ${vitisToDACPipe}
 ${cleaner} ${TxFeedbkAppPipeName}
+
+cd $oldDir

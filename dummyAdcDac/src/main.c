@@ -20,7 +20,7 @@ void printHelp(){
     printf("-txfb: Path to the Tx Feedback Pipe (required if -tx is present)\n");
     printf("-blocklen: Block length in samples\n");
     printf("-gain: Gain of the ADC/DAC\n");
-    printf("-cpu: CPU to run this application on\n");
+    printf("-cpu: CPU to run this application on (negative number to not pin to a particular CPU, does not apply to MacOS)\n");
     printf("-v: verbose\n");
 }
 
@@ -98,9 +98,6 @@ int main(int argc, char **argv) {
 
             if (i < argc) {
                 cpu = strtol(argv[i], NULL, 10);
-                if (cpu <= 0) {
-                    printf("-cpu must be non-negative\n");
-                }
             } else {
                 printf("Missing argument for -cpu\n");
                 exit(1);
@@ -128,7 +125,6 @@ int main(int argc, char **argv) {
     threadArgs.print = print;
 
     //Create Thread
-    cpu_set_t cpuset_app;
     pthread_t thread_app;
     pthread_attr_t attr_app;
 
@@ -138,16 +134,26 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    //Set Thread CPU
-    if (cpu >= 0) {
-        CPU_ZERO(&cpuset_app); //Clear cpuset
-        CPU_SET(cpu, &cpuset_app); //Add CPU to cpuset
-        status = pthread_attr_setaffinity_np(&attr_app, sizeof(cpu_set_t), &cpuset_app);//Set thread CPU affinity
-        if (status != 0) {
-            printf("Could not set thread core affinity ... exiting");
-            exit(1);
+    #ifdef __APPLE__
+        printf("Warning: On MacOS, CPU parameter is ignored\n");
+    #else
+        //Can't set thread affinity on MacOS
+
+        if(cpu >= 0){
+            cpu_set_t cpuset_app;
+
+            //Set Thread CPU
+            if (cpu >= 0) {
+                CPU_ZERO(&cpuset_app); //Clear cpuset
+                CPU_SET(cpu, &cpuset_app); //Add CPU to cpuset
+                status = pthread_attr_setaffinity_np(&attr_app, sizeof(cpu_set_t), &cpuset_app);//Set thread CPU affinity
+                if (status != 0) {
+                    printf("Could not set thread core affinity ... exiting");
+                    exit(1);
+                }
+            }
         }
-    }
+    #endif
 
     //Start Thread
     status = pthread_create(&thread_app, &attr_app, mainThread, &threadArgs);

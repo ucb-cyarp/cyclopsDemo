@@ -4,10 +4,10 @@
 
 RxSrc=rev1BB_receiver
 TxSrc=rev1BB_transmitter
-cyclopsASCIIDir=../submodules/cyclopsASCIILink-sharedMem
-uhdToPipesDir=../submodules/uhdToPipes
-dummyAdcDacDir=../dummyAdcDacSharedMemFIFO
-BlockSize=32
+cyclopsASCIIDir=../../submodules/cyclopsASCIILink-sharedMem
+uhdToPipesDir=../../submodules/uhdToPipes
+dummyAdcDacDir=../../dummyAdcDacSharedMemFIFO
+BlockSize=64
 IO_FIFO_SIZE=128
 
 if [ -z $1 ]; then
@@ -18,21 +18,23 @@ fi
 
 appCPU=1
 TxTokens=10
-txPer=1.0
+txdutycycle=0.05
+rxsubsampleperiod=100
 
 ProcessLimitCyclops=10
 vitisFromADCPipe="rx_demo_input_bundle_1"
-vitisFromRxPipe="rx_demo_output_bundle_2"
+vitisFromRxPipe="rx_demo_output_bundle_1"
 
 vitisToTxPipe="tx_demo_input_bundle_1"
-vitisToDACPipe="tx_demo_output_bundle_2"
+vitisToDACPipe="tx_demo_output_bundle_1"
 
-uhdCPU=2
-txCPU=3
-rxCPU=18
+uhdCPU=4
+txCPU=5
+rxCPU=6
+
 usrpArgs="addr=192.168.40.2"
 Freq=5800000000
-Rate=1000000
+Rate=4000000
 TxGainDB=30
 RxGainDB=30
 txChan=0
@@ -77,9 +79,9 @@ sleep 5
 
 #Start cyclopsASCII (before the ADC/DAC)
 #Feedback backpressure will prevent a runaway
-tmux split-window -v -d -t vitis_cyclopse_demo:0 "printf '\\033]2;%s\\033\\\\' 'Cyclops_ASCII_Application'; ${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ${vitisFromRxPipe} -tx ${vitisToTxPipe} -txfb ${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} -processlimit ${ProcessLimitCyclops} -txperiod ${txPer} -fifosize ${IO_FIFO_SIZE}"
+tmux split-window -v -d -t vitis_cyclopse_demo:0 "printf '\\033]2;%s\\033\\\\' 'Cyclops_ASCII_Application'; ${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ${vitisFromRxPipe} -tx ${vitisToTxPipe} -txfb ${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} -processlimit ${ProcessLimitCyclops} -txdutycycle ${txdutycycle} -rxsubsampleperiod ${rxsubsampleperiod} -fifosize ${IO_FIFO_SIZE}"
 # tmux rename-window -t vitis_cyclopse_demo:2 'cyclopsASCII'
-echo "${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ${vitisFromRxPipe} -tx ${vitisToTxPipe} -txfb ${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} -processlimit ${ProcessLimitCyclops} -txperiod ${txPer} -fifosize ${IO_FIFO_SIZE}"
+echo "${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ${vitisFromRxPipe} -tx ${vitisToTxPipe} -txfb ${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} -processlimit ${ProcessLimitCyclops} -txdutycycle ${txdutycycle} -rxsubsampleperiod ${rxsubsampleperiod} -fifosize ${IO_FIFO_SIZE}"
 
 if [ ${USE_DUMMY} -ne 0 ]; then
     #Start dummyAdcDac

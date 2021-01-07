@@ -3,6 +3,9 @@ RxSrc=rev1BB_receiver
 TxSrc=rev1BB_transmitter
 BlockSize=64
 IO_FIFO_SIZE=128
+FIFO_LEN=7
+#FIFO_TYPE=lockeless_x86
+FIFO_TYPE=lockeless_inplace_x86
 
 #Set the compiler to use here
 source ./setCompilersToUse.sh
@@ -36,12 +39,12 @@ $CXX -v > $compilerInfoName 2>&1
 
 #Generate
 
-./runRxMultithreadGen.sh ${RxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX}
+./runRxMultithreadGen.sh ${RxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE}
 if [ $? -ne 0 ]; then
         echo "Gen Failed for Rx"
         exit 1
 fi
-./runTxMultithreadGen.sh ${TxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX}
+./runTxMultithreadGen.sh ${TxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE}
 if [ $? -ne 0 ]; then
         echo "Gen Failed for Tx"
         exit 1

@@ -51,6 +51,11 @@ else
     echo "Demo with USRP/UHD"
 fi
 
+if [[ -d "demoRun" ]]; then
+	echo "rm -r demoRun"
+	rm -r demoRun
+fi
+
 mkdir demoRun
 cd demoRun
 #Start vitis generated code

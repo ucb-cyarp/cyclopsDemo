@@ -8,6 +8,7 @@ cyclopsASCIIDir=../../submodules/cyclopsASCIILink-sharedMem
 uhdToPipesDir=../../submodules/uhdToPipes
 dummyAdcDacDir=../../dummyAdcDacSharedMemFIFO
 BlockSize=64
+#BlockSize=16
 IO_FIFO_SIZE=128
 
 if [ -z $1 ]; then
@@ -21,7 +22,8 @@ TxTokens=10
 txdutycycle=0.05
 rxsubsampleperiod=100
 
-ProcessLimitCyclops=10
+#ProcessLimitCyclops=10
+ProcessLimitCyclops=100
 vitisFromADCPipe="rx_demo_input_bundle_1"
 vitisFromRxPipe="rx_demo_output_bundle_1"
 
@@ -53,6 +55,10 @@ else
     echo "Demo with USRP/UHD"
 fi
 
+if [[ -d "demoRun" ]]; then
+	echo "rm -r demoRun"
+	rm -r demoRun
+fi
 mkdir demoRun
 cd demoRun
 #Start vitis generated code

@@ -95,9 +95,4 @@ if [[ ! -e $buildDir/../sharedMemFIFOBench/build ]]; then
     make
 fi
 
-echo "#### Running make on benchmarking/common ####"
-cd $buildDir/../submodules/benchmarking/common
-echo "make CC=$CC CXX=$CXX USE_PCM=0 USE_AMDuPROF=0"
-make CC=$CC CXX=$CXX USE_PCM=0 USE_AMDuPROF=0
-
 cd $oldDir

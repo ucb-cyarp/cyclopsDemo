@@ -58,11 +58,6 @@ if [[ -e $buildDir/$buildLogName ]]; then
     rm -r $buildDir/$buildLogName
 fi
 
-#Clean benchmarking
-echo "Cleaning benchmarking/common"
-cd $buildDir/../submodules/benchmarking/common
-make clean
-
 if [[ -e $buildDir/../submodules/cyclopsASCIILink/build ]]; then
     echo "Removed cyclopsASCIILink/build"
     rm -r $buildDir/../submodules/cyclopsASCIILink/build

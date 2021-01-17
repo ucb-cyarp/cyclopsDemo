@@ -10,6 +10,7 @@ FIFO_LEN=31
 FIFO_TYPE=lockeless_inplace_x86
 #FIFO_IND_CACHE_TYPE=none
 FIFO_IND_CACHE_TYPE=producer_consumer_cache
+FIFO_DOUBLE_BUFFERING=none
 
 #Set the compiler to use here
 source ./setCompilersToUse.sh
@@ -43,12 +44,12 @@ $CXX -v > $compilerInfoName 2>&1
 
 #Generate
 
-./runRxMultithreadGen.sh ${RxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE}
+./runRxMultithreadGen.sh ${RxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE} ${FIFO_DOUBLE_BUFFERING}
 if [ $? -ne 0 ]; then
         echo "Gen Failed for Rx"
         exit 1
 fi
-./runTxMultithreadGen.sh ${TxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE}
+./runTxMultithreadGen.sh ${TxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE} ${FIFO_DOUBLE_BUFFERING}
 if [ $? -ne 0 ]; then
         echo "Gen Failed for Tx"
         exit 1

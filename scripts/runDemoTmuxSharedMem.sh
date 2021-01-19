@@ -18,7 +18,7 @@ else
 fi
 
 appCPU=1
-TxTokens=10
+TxTokens=100
 txdutycycle=0.05
 rxsubsampleperiod=100
 

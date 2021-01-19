@@ -12,11 +12,11 @@ if [[ $(uname) == "Darwin" ]]; then
         #Cannot set thread affinity on MacOS
         partitionMap="[]" 
 else
-        partitionMap="[12,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]"
+        partitionMap="[44,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62]"
 fi
 
 #./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} rx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength $6 --ioFifoSize $3 --partitionMap ${partitionMap} --useSCHED_FIFO --fifoType $7 --fifoCachedIndexes $8 --fifoDoubleBuffering $9
-./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} rx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength $6 --ioFifoSize $3 --partitionMap ${partitionMap}  --printTelem --telemDumpPrefix telemDump_ --useSCHED_FIFO --fifoType $7 --fifoCachedIndexes $8 --fifoDoubleBuffering $9
+./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} rx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength $6 --ioFifoSize $3 --partitionMap ${partitionMap}  --printTelem --telemDumpPrefix telemDump_ --useSCHED_FIFO --fifoType $7 --fifoCachedIndexes $8 --fifoDoubleBuffering $9 --pipeNameSuffix _inst2
 #./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} rx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength $6 --ioFifoSize $3 --partitionMap ${partitionMap} --telemDumpPrefix telemDump_ --useSCHED_FIFO --fifoType $7 --fifoCachedIndexes $8 --fifoDoubleBuffering $9
 
 if [ $? -ne 0 ]; then

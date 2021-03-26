@@ -19,8 +19,8 @@ fi
 
 appCPU=1
 TxTokens=100
-txdutycycle=0.05
-rxsubsampleperiod=100
+txdutycycle=1.00
+rxsubsampleperiod=2000
 
 #ProcessLimitCyclops=10
 ProcessLimitCyclops=100

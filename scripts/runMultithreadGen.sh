@@ -11,7 +11,10 @@ FIFO_TYPE=lockeless_x86
 #FIFO_IND_CACHE_TYPE=none
 FIFO_IND_CACHE_TYPE=producer_consumer_cache
 FIFO_DOUBLE_BUFFERING=none
-TELEM_LVL=breakdown
+
+#PAPI should be only active in one program at a time
+TELEM_LVL_TX=rate_only
+TELEM_LVL_RX=papi_rate_only
 
 #Set the compiler to use here
 source ./setCompilersToUse.sh
@@ -43,16 +46,17 @@ $CC -v > $compilerInfoName 2>&1
 echo "CXX:" >> $compilerInfoName
 $CXX -v > $compilerInfoName 2>&1
 
-echo "Telem LVL: ${TELEM_LVL}"
+echo "Telem LVL Tx: ${TELEM_LVL_TX}"
+echo "Telem LVL Rx: ${TELEM_LVL_RX}"
 
 #Generate
 
-./runRxMultithreadGen.sh ${RxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE} ${FIFO_DOUBLE_BUFFERING} ${TELEM_LVL}
+./runRxMultithreadGen.sh ${RxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE} ${FIFO_DOUBLE_BUFFERING} ${TELEM_LVL_RX}
 if [ $? -ne 0 ]; then
         echo "Gen Failed for Rx"
         exit 1
 fi
-./runTxMultithreadGen.sh ${TxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE} ${FIFO_DOUBLE_BUFFERING} ${TELEM_LVL}
+./runTxMultithreadGen.sh ${TxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE} ${FIFO_DOUBLE_BUFFERING} ${TELEM_LVL_TX}
 if [ $? -ne 0 ]; then
         echo "Gen Failed for Tx"
         exit 1

@@ -64,7 +64,7 @@ cd demoRun
 #Start vitis generated code
 mkdir rx
 cd rx
-tmux new-session -d -s vitis_cyclopse_demo "printf '\\033]2;%s\\033\\\\' 'Rx_DSP'; ${RxDir}/benchmark_rx_demo_io_posix_shared_mem"
+tmux new-session -d -s vitis_cyclopse_demo "printf '\\033]2;%s\\033\\\\' 'Rx_DSP'; module load papi; ${RxDir}/benchmark_rx_demo_io_posix_shared_mem"
 tmux rename-window -t vitis_cyclopse_demo:0 'vitis_cyclopse_demo'
 tmux set-option -t vitis_cyclopse_demo pane-border-status top
 
@@ -72,7 +72,7 @@ echo "${RxDir}/benchmark_rx_demo_io_posix_shared_mem"
 cd ..
 mkdir tx
 cd tx
-tmux split-window -h -d -t vitis_cyclopse_demo:0 "printf '\\033]2;%s\\033\\\\' 'Tx_DSP'; ${TxDir}/benchmark_tx_demo_io_posix_shared_mem"
+tmux split-window -h -d -t vitis_cyclopse_demo:0 "printf '\\033]2;%s\\033\\\\' 'Tx_DSP'; module load papi; ${TxDir}/benchmark_tx_demo_io_posix_shared_mem"
 # tmux rename-window -t vitis_cyclopse_demo:1 'tx'
 echo "${TxDir}/benchmark_tx_demo_io_posix_shared_mem"
 cd ..

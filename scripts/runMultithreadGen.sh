@@ -11,6 +11,7 @@ FIFO_TYPE=lockeless_x86
 #FIFO_IND_CACHE_TYPE=none
 FIFO_IND_CACHE_TYPE=producer_consumer_cache
 FIFO_DOUBLE_BUFFERING=none
+TELEM_LVL=breakdown
 
 #Set the compiler to use here
 source ./setCompilersToUse.sh
@@ -42,14 +43,16 @@ $CC -v > $compilerInfoName 2>&1
 echo "CXX:" >> $compilerInfoName
 $CXX -v > $compilerInfoName 2>&1
 
+echo "Telem LVL: ${TELEM_LVL}"
+
 #Generate
 
-./runRxMultithreadGen.sh ${RxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE} ${FIFO_DOUBLE_BUFFERING}
+./runRxMultithreadGen.sh ${RxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE} ${FIFO_DOUBLE_BUFFERING} ${TELEM_LVL}
 if [ $? -ne 0 ]; then
         echo "Gen Failed for Rx"
         exit 1
 fi
-./runTxMultithreadGen.sh ${TxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE} ${FIFO_DOUBLE_BUFFERING}
+./runTxMultithreadGen.sh ${TxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE} ${FIFO_DOUBLE_BUFFERING} ${TELEM_LVL}
 if [ $? -ne 0 ]; then
         echo "Gen Failed for Tx"
         exit 1

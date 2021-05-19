@@ -13,7 +13,7 @@ FIFO_IND_CACHE_TYPE=producer_consumer_cache
 FIFO_DOUBLE_BUFFERING=none
 
 #PAPI should be only active in one program at a time
-TELEM_LVL_TX=rate_only
+TELEM_LVL_TX=io_rate_only
 TELEM_LVL_RX=papi_rate_only
 
 #Set the compiler to use here

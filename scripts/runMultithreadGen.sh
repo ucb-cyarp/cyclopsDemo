@@ -1,9 +1,10 @@
 #!/bin/bash
 RxSrc=rev1BB_receiver
 TxSrc=rev1BB_transmitter
-BlockSize=64
+BlockSize=120
+#BlockSize=64
 #BlockSize=16
-IO_FIFO_SIZE=128
+IO_FIFO_SIZE=120
 #FIFO_LEN=7
 FIFO_LEN=31
 FIFO_TYPE=lockeless_x86
@@ -14,7 +15,8 @@ FIFO_DOUBLE_BUFFERING=none
 
 #PAPI should be only active in one program at a time
 TELEM_LVL_TX=io_rate_only
-TELEM_LVL_RX=papi_rate_only
+#TELEM_LVL_RX=papi_rate_only
+TELEM_LVL_RX=breakdown
 
 #Set the compiler to use here
 source ./setCompilersToUse.sh

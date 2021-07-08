@@ -7,9 +7,10 @@ TxSrc=rev1BB_transmitter
 cyclopsASCIIDir=../../submodules/cyclopsASCIILink-sharedMem
 uhdToPipesDir=../../submodules/uhdToPipes
 dummyAdcDacDir=../../dummyAdcDacSharedMemFIFO
-BlockSize=64
+BlockSize=120
+#BlockSize=64
 #BlockSize=16
-IO_FIFO_SIZE=128
+IO_FIFO_SIZE=120
 
 if [ -z $1 ]; then
     USE_DUMMY=0
@@ -18,7 +19,7 @@ else
 fi
 
 appCPU=1
-TxTokens=100
+TxTokens=1000
 txdutycycle=1.00
 rxsubsampleperiod=2000
 

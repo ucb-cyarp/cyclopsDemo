@@ -18,7 +18,8 @@ else
     USE_DUMMY=$1
 fi
 
-appCPU=1
+appCPU=7 # Epyc 3000 & Ryzen 3000 (New Bios)
+# appCPU=4 # Ryzen 3000 (Old Bios)
 TxTokens=1000
 txdutycycle=1.00
 rxsubsampleperiod=2000
@@ -31,9 +32,15 @@ vitisFromRxPipe="rx_demo_output_bundle_1"
 vitisToTxPipe="tx_demo_input_bundle_1"
 vitisToDACPipe="tx_demo_output_bundle_1"
 
-uhdCPU=4
+#Epyc 7002 & Ryzen 3000 (New Bios)
+uhdCPU=4 
 txCPU=5
 rxCPU=6
+
+# #Ryzen 3000 (Old Bios)
+# uhdCPU=1
+# txCPU=2
+# rxCPU=3
 
 usrpArgs="addr=192.168.40.2"
 Freq=5800000000

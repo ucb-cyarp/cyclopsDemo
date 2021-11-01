@@ -4,6 +4,7 @@ TxSrc=rev1BB_transmitter
 BlockSize=120
 #BlockSize=64
 #BlockSize=16
+SubBlockSize=0
 IO_FIFO_SIZE=120
 #FIFO_LEN=7
 FIFO_LEN=31
@@ -17,6 +18,7 @@ FIFO_DOUBLE_BUFFERING=none
 TELEM_LVL_TX=io_rate_only
 #TELEM_LVL_RX=papi_rate_only
 TELEM_LVL_RX=breakdown
+#TELEM_LVL_RX=io_rate_only
 
 #Set the compiler to use here
 source ./setCompilersToUse.sh
@@ -53,12 +55,12 @@ echo "Telem LVL Rx: ${TELEM_LVL_RX}"
 
 #Generate
 
-./runRxMultithreadGen.sh ${RxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE} ${FIFO_DOUBLE_BUFFERING} ${TELEM_LVL_RX}
+./runRxMultithreadGen.sh ${RxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE} ${FIFO_DOUBLE_BUFFERING} ${TELEM_LVL_RX} ${SubBlockSize}
 if [ $? -ne 0 ]; then
         echo "Gen Failed for Rx"
         exit 1
 fi
-./runTxMultithreadGen.sh ${TxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE} ${FIFO_DOUBLE_BUFFERING} ${TELEM_LVL_TX}
+./runTxMultithreadGen.sh ${TxSrc} ${BlockSize} ${IO_FIFO_SIZE} ${CC} ${CXX} ${FIFO_LEN} ${FIFO_TYPE} ${FIFO_IND_CACHE_TYPE} ${FIFO_DOUBLE_BUFFERING} ${TELEM_LVL_TX} ${SubBlockSize}
 if [ $? -ne 0 ]; then
         echo "Gen Failed for Tx"
         exit 1

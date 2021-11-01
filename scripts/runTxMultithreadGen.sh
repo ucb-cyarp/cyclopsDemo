@@ -12,12 +12,17 @@ if [[ $(uname) == "Darwin" ]]; then
         #Cannot set thread affinity on MacOS
         partitionMap="[]" 
 else
+	#For Epyc 7002 & Ryzen 3000 (New BIOS)
         partitionMap="[8,8,9,10]"
+        
+	#For Ryzen 3000 (Old BIOS)
+	#L3: 2
+	# partitionMap="[5,5,6,7]"
 fi
 
 #./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} tx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength $6 --ioFifoSize $3 --partitionMap ${partitionMap} --useSCHED_FIFO --fifoType $7 --fifoCachedIndexes $8 --fifoDoubleBuffering $9
 #./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} tx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength $6 --ioFifoSize $3 --partitionMap ${partitionMap} --printTelem --useSCHED_FIFO --fifoType $7 --fifoCachedIndexes $8 --fifoDoubleBuffering $9 --telemLevel ${10}
-./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} tx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength $6 --ioFifoSize $3 --partitionMap ${partitionMap} --printTelem --telemDumpPrefix telemDump_ --useSCHED_FIFO --fifoType $7 --fifoCachedIndexes $8 --fifoDoubleBuffering $9 --telemLevel ${10}
+./multiThreadedGenerator $1_vitis.graphml ./${OUT_DIR} tx_demo --emitGraphMLSched --schedHeur DFS --blockSize $2 --fifoLength $6 --ioFifoSize $3 --partitionMap ${partitionMap} --printTelem --telemDumpPrefix telemDump_ --useSCHED_FIFO --fifoType $7 --fifoCachedIndexes $8 --fifoDoubleBuffering $9 --telemLevel ${10} --subBlockSize ${11}
 
 if [ $? -ne 0 ]; then
         echo "Multithread Gen Failed for Tx"

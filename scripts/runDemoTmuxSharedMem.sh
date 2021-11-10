@@ -44,7 +44,7 @@ rxCPU=6
 # txCPU=2
 # rxCPU=3
 
-Freq=5800000000
+Freq=2400000000
 #Low Rate
 # Rate=4000000
 # BW=6000000
@@ -54,7 +54,7 @@ BW=40000000
 #Max Rate
 # Rate=61440000
 # BW=56000000
-TxGainDB=50
+TxGainDB=35
 RxGainDB=45
 #For BladeRF Only
 FullScale=2.0

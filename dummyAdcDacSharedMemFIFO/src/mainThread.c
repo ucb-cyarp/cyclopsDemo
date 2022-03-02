@@ -12,6 +12,8 @@
 
 #include "depends/BerkeleySharedMemoryFIFO.h"
 
+// #define WRITE_RX_CSV
+
 void* mainThread(void* uncastArgs){
     threadArgs_t* args = (threadArgs_t*) uncastArgs;
     char *txSharedName = args->txSharedName;
@@ -51,6 +53,12 @@ void* mainThread(void* uncastArgs){
     //If transmitting, allocate arrays and form a Tx packet
     SAMPLE_COMPONENT_DATATYPE* sampBuffer = (SAMPLE_COMPONENT_DATATYPE*) malloc(sizeof(SAMPLE_COMPONENT_DATATYPE)*2*blockLen);
 
+    #ifdef WRITE_RX_CSV
+        printf("Writing to ./dummyADCDAC_rx.csv\n");
+        FILE *rxCSV = fopen("./dummyADCDAC_rx.csv", "w");
+        fprintf(rxCSV, "re,im\n");
+    #endif
+
     //Main Loop
     bool running = true;
     while(running){
@@ -70,6 +78,13 @@ void* mainThread(void* uncastArgs){
             }
         }
 
+        #ifdef WRITE_RX_CSV
+            //Write to CSV too
+            for(int i = 0; i<blockLen; i++){
+                fprintf(rxCSV, "%f,%f\n", sampBuffer[i], sampBuffer[blockLen+i]);
+            }
+        #endif
+
         //Write samples to tx pipe (ok to block)
         // printf("About to write samples\n");
         writeFifo(sampBuffer, fifoBufferBlockSizeBytes, 1, &rxFifo);
@@ -79,6 +94,11 @@ void* mainThread(void* uncastArgs){
         writeFifo(&tokensReturned, txfbFifoBufferBlockSizeBytes, 1, &txfbFifo);
         // printf("Wrote token\n");
     }
+
+    #ifdef WRITE_RX_CSV
+        fclose(rxCSV);
+    #endif
+
 
     free(sampBuffer);
 

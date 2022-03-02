@@ -83,6 +83,11 @@ if [[ -e $buildDir/../submodules/uhdToPipes/build ]]; then
     rm -r $buildDir/../submodules/uhdToPipes/build
 fi
 
+if [[ -e $buildDir/../submodules/bladeRFToFIFO/build ]]; then
+    echo "Removed bladeRFToFIFO/build"
+    rm -r $buildDir/../submodules/bladeRFToFIFO/build
+fi
+
 if [[ -e $buildDir/../sharedMemFIFOBench/build ]]; then
     echo "Removed sharedMemFIFOBench/build"
     rm -r $buildDir/../sharedMemFIFOBench/build

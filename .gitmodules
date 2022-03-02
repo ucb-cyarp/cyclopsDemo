@@ -13,3 +13,6 @@
 [submodule "submodules/cyclopsASCIILink-sharedMem"]
 	path = submodules/cyclopsASCIILink-sharedMem
 	url = git@github.com:ucb-cyarp/cyclopsASCIILink.git
+[submodule "submodules/bladeRFToFIFO"]
+	path = submodules/bladeRFToFIFO
+	url = git@github.com:ucb-cyarp/bladeRFToFIFO.git

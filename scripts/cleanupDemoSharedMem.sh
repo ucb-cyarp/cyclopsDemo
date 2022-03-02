@@ -26,7 +26,7 @@ vitisToTxPipe="tx_demo_input_bundle_1"
 vitisToDACPipe="tx_demo_output_bundle_1"
 TxFeedbkAppPipeName="txFeedbkAppLayer"
 
-pkill -f uhdToPipes
+pkill -f bladeRFToFIFO
 pkill -f benchmark_tx_demo_io_posix_shared_mem
 pkill -f benchmark_rx_demo_io_posix_shared_mem
 pkill -f cyclopsASCIILink

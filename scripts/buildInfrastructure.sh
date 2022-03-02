@@ -85,6 +85,15 @@ if [[ ! -e $buildDir/../submodules/uhdToPipes/build && ! -z $(which uhd_usrp_pro
     make
 fi
 
+if [[ ! -e $buildDir/../submodules/bladeRFToFIFO/build && ! -z $(which bladeRF-cli) ]]; then
+    echo "#### Building bladeRFToFIFO ####"
+    cd $buildDir/../submodules/bladeRFToFIFO
+    mkdir build
+    cd build
+    cmake -D CMAKE_C_COMPILER=$CC -D CMAKE_CXX_COMPILER=$CXX ..
+    make
+fi
+
 #Used for cleaning shared memory demo
 if [[ ! -e $buildDir/../sharedMemFIFOBench/build ]]; then
     echo "#### Building sharedMemFIFOBench ####"

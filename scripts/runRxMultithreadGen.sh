@@ -10,8 +10,13 @@ mkdir ${OUT_DIR}
 
 if [[ $(uname) == "Darwin" ]]; then
         #Cannot set thread affinity on MacOS
+        echo "Building for MacOS, Thread Pinning Not Performed"
         partitionMap="[]" 
-else
+elif [[ ${BUILD_ENV} == "DOCKER" ]]; then
+        #When running in Docker, do not set 
+        echo "Building for Docker, Thread Pinning Not Performed"
+        partitionMap="[]" 
+else 
         #              -2  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18
        #partitionMap="[12,12,13,14,15,16,17,18,19,20,21,16,23,24,25,26,27,28,29,30]"
         # partitionMap="[12,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]"

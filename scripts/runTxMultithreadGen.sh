@@ -10,7 +10,12 @@ mkdir ${OUT_DIR}
 
 if [[ $(uname) == "Darwin" ]]; then
         #Cannot set thread affinity on MacOS
+        echo "Building for MacOS, Thread Pinning Not Performed"
         partitionMap="[]" 
+elif [[ ${BUILD_ENV} == "DOCKER" ]]; then
+        #When running in Docker, do not set 
+        echo "Building for Docker, Thread Pinning Not Performed"
+        partitionMap="[]"  
 else
 	#For Epyc 7002 & Ryzen 3000 (New BIOS)
         partitionMap="[8,8,9,10]"

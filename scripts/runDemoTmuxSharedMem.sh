@@ -27,11 +27,15 @@ rxsubsampleperiod=100
 
 #ProcessLimitCyclops=10
 ProcessLimitCyclops=100
-vitisFromADCPipe="rx_demo_input_bundle_1"
-vitisFromRxPipe="rx_demo_output_bundle_1"
 
-vitisToTxPipe="tx_demo_input_bundle_1"
-vitisToDACPipe="tx_demo_output_bundle_1"
+#NOTE: The shared memory FIFO names come from the demo
+vitisFromADCPipe="rx_demo_inst2_input_bundle_1"
+vitisFromRxPipe="rx_demo_inst2_output_bundle_1"
+
+vitisToTxPipe="tx_demo_inst2_input_bundle_1"
+vitisToDACPipe="tx_demo_inst2_output_bundle_1"
+
+TxFeedbkAppPipeName="txFeedbkAppLayer_inst2"
 
 if [[ $(uname) == "Darwin" ]]; then
     appCPU=-1
@@ -45,10 +49,18 @@ elif [[ ${BUILD_ENV} == "DOCKER" ]]; then
     rxCPU=-1
 else
     #Epyc 7002 & Ryzen 3000 (New Bios)
-    appCPU=7
-    uhdCPU=4 
-    txCPU=5
-    rxCPU=6
+    #Instance 1
+    # appCPU=7
+    # uhdCPU=4 
+    # txCPU=5
+    # rxCPU=6
+
+    #Instance 2
+    #Note, putting on another Core (not occupied by instance1) so it will not be a bottleneck when testing under SMT
+    appCPU=63
+    uhdCPU=60 
+    txCPU=62
+    rxCPU=61
 
     # #Ryzen 3000 (Old Bios)
     # appCPU=4
@@ -169,56 +181,53 @@ cd demoRun
 #Start vitis generated code
 mkdir rx
 cd rx
-tmux new-session -d -s vitis_cyclops_demo "printf '\\033]2;%s\\033\\\\' 'Rx_DSP'; module load papi; ${RxDir}/benchmark_rx_demo_io_posix_shared_mem"
-tmux rename-window -t vitis_cyclops_demo:0 'vitis_cyclops_demo'
-tmux set-option -t vitis_cyclops_demo pane-border-status top
+tmux new-session -d -s vitis_cyclops_demo_inst2 "printf '\\033]2;%s\\033\\\\' 'Rx_DSP'; module load papi; ${RxDir}/benchmark_rx_demo_inst2_io_posix_shared_mem"
+tmux rename-window -t vitis_cyclops_demo_inst2:0 'vitis_cyclops_demo_inst2'
+tmux set-option -t vitis_cyclops_demo_inst2 pane-border-status top
 
-echo "${RxDir}/benchmark_rx_demo_io_posix_shared_mem"
+echo "${RxDir}/benchmark_rx_demo_inst2_io_posix_shared_mem"
 cd ..
 mkdir tx
 cd tx
-tmux split-window -h -d -t vitis_cyclops_demo:0 "printf '\\033]2;%s\\033\\\\' 'Tx_DSP'; module load papi; ${TxDir}/benchmark_tx_demo_io_posix_shared_mem; sleep 5"
-# tmux rename-window -t vitis_cyclops_demo:1 'tx'
-echo "${TxDir}/benchmark_tx_demo_io_posix_shared_mem"
+tmux split-window -h -d -t vitis_cyclops_demo_inst2:0 "printf '\\033]2;%s\\033\\\\' 'Tx_DSP'; module load papi; ${TxDir}/benchmark_tx_demo_inst2_io_posix_shared_mem; sleep 5"
+# tmux rename-window -t vitis_cyclops_demo_inst2:1 'tx'
+echo "${TxDir}/benchmark_tx_demo_inst2_io_posix_shared_mem"
 cd ..
-
-#Create Feeback Pipe for the Application Layer Side
-TxFeedbkAppPipeName="txFeedbkAppLayer"
 
 echo "Waiting 5 Seconds for DSP to Start"
 sleep 5
 
 #Start cyclopsASCII (before the ADC/DAC)
 #Feedback backpressure will prevent a runaway
-tmux split-window -v -d -t vitis_cyclops_demo:0 "printf '\\033]2;%s\\033\\\\' 'Cyclops_ASCII_Application'; ${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ${vitisFromRxPipe} -tx ${vitisToTxPipe} -txfb ${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} -processlimit ${ProcessLimitCyclops} -txdutycycle ${txdutycycle} -rxsubsampleperiod ${rxsubsampleperiod} -fifosize ${IO_FIFO_SIZE}; sleep 5"
-# tmux rename-window -t vitis_cyclops_demo:2 'cyclopsASCII'
+tmux split-window -v -d -t vitis_cyclops_demo_inst2:0 "printf '\\033]2;%s\\033\\\\' 'Cyclops_ASCII_Application'; ${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ${vitisFromRxPipe} -tx ${vitisToTxPipe} -txfb ${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} -processlimit ${ProcessLimitCyclops} -txdutycycle ${txdutycycle} -rxsubsampleperiod ${rxsubsampleperiod} -fifosize ${IO_FIFO_SIZE}; sleep 5"
+# tmux rename-window -t vitis_cyclops_demo_inst2:2 'cyclopsASCII'
 echo "${cyclopsASCIIBuildDir}/cyclopsASCIILink -rx ${vitisFromRxPipe} -tx ${vitisToTxPipe} -txfb ${TxFeedbkAppPipeName} -txtokens ${TxTokens} -cpu ${appCPU} -processlimit ${ProcessLimitCyclops} -txdutycycle ${txdutycycle} -rxsubsampleperiod ${rxsubsampleperiod} -fifosize ${IO_FIFO_SIZE}"
 
 if [ ${USE_DUMMY} -ne 0 ]; then
     #Start dummyAdcDac
-    tmux split-window -v -d -t vitis_cyclops_demo:0.2 "printf '\\033]2;%s\\033\\\\' 'Dummy_ADC/DAC'; ${dummyAdcDacBuildDir}/dummyAdcDacSharedMemFIFO -cpu ${txCPU} -rx ${vitisFromADCPipe} -tx ${vitisToDACPipe} -txfb ${TxFeedbkAppPipeName} -blocklen ${BlockSize} -fifosize ${IO_FIFO_SIZE}; sleep 5"
-    # tmux rename-window -t vitis_cyclops_demo:3 'dummyAdcDac'
+    tmux split-window -v -d -t vitis_cyclops_demo_inst2:0.2 "printf '\\033]2;%s\\033\\\\' 'Dummy_ADC/DAC'; ${dummyAdcDacBuildDir}/dummyAdcDacSharedMemFIFO -cpu ${txCPU} -rx ${vitisFromADCPipe} -tx ${vitisToDACPipe} -txfb ${TxFeedbkAppPipeName} -blocklen ${BlockSize} -fifosize ${IO_FIFO_SIZE}; sleep 5"
+    # tmux rename-window -t vitis_cyclops_demo_inst2:3 'dummyAdcDac'
     echo "${dummyAdcDacBuildDir}/dummyAdcDacSharedMemFIFO -cpu ${txCPU} -rx ${vitisFromADCPipe} -tx ${vitisToDACPipe} -txfb ${TxFeedbkAppPipeName} -blocklen ${BlockSize} -fifosize ${IO_FIFO_SIZE}"
 else
     # #Start bladeRFToFIFO
-    tmux split-window -v -d -t vitis_cyclops_demo:0.2 "printf '\\033]2;%s\\033\\\\' 'bladeRF'; module load bladeRF; ${bladeRFToFIFOBuildDir}/bladeRFToFIFO -txFreq ${Freq} -rxFreq ${Freq} -txSampRate ${Rate} -rxSampRate ${Rate} -txBW ${BW} -rxBW ${BW} -txGain ${TxGainDB} -rxGain ${RxGainDB} -txCpu ${txCPU} -rxCpu ${rxCPU} -rx ${vitisFromADCPipe} -tx ${vitisToDACPipe} -txfb ${TxFeedbkAppPipeName} -blocklen ${BlockSize} -fifosize ${IO_FIFO_SIZE} -fullScale ${FullScale} -saturate -txSerialNum ${BLADERF_TX_SERIAL} -rxSerialNum ${BLADERF_RX_SERIAL} -txDCOffsetI ${BLADERF_TX_DC_I} -txDCOffsetQ ${BLADERF_TX_DC_Q} -rxDCOffsetI ${BLADERF_RX_DC_I} -rxDCOffsetQ ${BLADERF_RX_DC_Q} -txIQGain ${BLADERF_TX_IQ_GAIN} -txIQPhase ${BLADERF_TX_IQ_PHASE_DEG} -rxIQGain ${BLADERF_RX_IQ_GAIN} -rxIQPhase ${BLADERF_RX_IQ_PHASE_DEG} -v; sleep 100"
-    # tmux rename-window -t vitis_cyclops_demo:3 'bladeRFToFIFO'
+    tmux split-window -v -d -t vitis_cyclops_demo_inst2:0.2 "printf '\\033]2;%s\\033\\\\' 'bladeRF'; module load bladeRF; ${bladeRFToFIFOBuildDir}/bladeRFToFIFO -txFreq ${Freq} -rxFreq ${Freq} -txSampRate ${Rate} -rxSampRate ${Rate} -txBW ${BW} -rxBW ${BW} -txGain ${TxGainDB} -rxGain ${RxGainDB} -txCpu ${txCPU} -rxCpu ${rxCPU} -rx ${vitisFromADCPipe} -tx ${vitisToDACPipe} -txfb ${TxFeedbkAppPipeName} -blocklen ${BlockSize} -fifosize ${IO_FIFO_SIZE} -fullScale ${FullScale} -saturate -txSerialNum ${BLADERF_TX_SERIAL} -rxSerialNum ${BLADERF_RX_SERIAL} -txDCOffsetI ${BLADERF_TX_DC_I} -txDCOffsetQ ${BLADERF_TX_DC_Q} -rxDCOffsetI ${BLADERF_RX_DC_I} -rxDCOffsetQ ${BLADERF_RX_DC_Q} -txIQGain ${BLADERF_TX_IQ_GAIN} -txIQPhase ${BLADERF_TX_IQ_PHASE_DEG} -rxIQGain ${BLADERF_RX_IQ_GAIN} -rxIQPhase ${BLADERF_RX_IQ_PHASE_DEG} -v; sleep 100"
+    # tmux rename-window -t vitis_cyclops_demo_inst2:3 'bladeRFToFIFO'
     echo "${bladeRFToFIFOBuildDir}/bladeRFToFIFO -txFreq ${Freq} -rxFreq ${Freq} -txSampRate ${Rate} -rxSampRate ${Rate} -txBW ${BW} -rxBW ${BW} -txGain ${TxGainDB} -rxGain ${RxGainDB} -txCpu ${txCPU} -rxCpu ${rxCPU} -rx ${vitisFromADCPipe} -tx ${vitisToDACPipe} -txfb ${TxFeedbkAppPipeName} -blocklen ${BlockSize} -fifosize ${IO_FIFO_SIZE} -fullScale ${FullScale} -saturate -txSerialNum ${BLADERF_TX_SERIAL} -rxSerialNum ${BLADERF_RX_SERIAL} -txDCOffsetI ${BLADERF_TX_DC_I} -txDCOffsetQ ${BLADERF_TX_DC_Q} -rxDCOffsetI ${BLADERF_RX_DC_I} -rxDCOffsetQ ${BLADERF_RX_DC_Q} -txIQGain ${BLADERF_TX_IQ_GAIN} -txIQPhase ${BLADERF_TX_IQ_PHASE_DEG} -rxIQGain ${BLADERF_RX_IQ_GAIN} -rxIQPhase ${BLADERF_RX_IQ_PHASE_DEG} -v"
 fi
 
 if [[ $1 == "2" ]]; then
     cd ${vitisTelemetryDashDir}/src/backend
-    tmux new-session -d -s vitis_telem_dash "printf '\\033]2;%s\\033\\\\' 'Backend'; ./runBackend.sh; sleep 500"
-    tmux rename-window -t vitis_telem_dash:0 'vitis_telem_dash'
-    tmux set-option -t vitis_telem_dash pane-border-status top
+    tmux new-session -d -s vitis_telem_dash_inst2 "printf '\\033]2;%s\\033\\\\' 'Backend'; ./runBackend.sh; sleep 500"
+    tmux rename-window -t vitis_telem_dash_inst2:0 'vitis_telem_dash_inst2'
+    tmux set-option -t vitis_telem_dash_inst2 pane-border-status top
     cd ../frontend
-    tmux split-window -h -d -t vitis_telem_dash:0 "printf '\\033]2;%s\\033\\\\' 'Frontend'; python3 vitisTelemetryDash.py; sleep 500"
+    tmux split-window -h -d -t vitis_telem_dash_inst2:0 "printf '\\033]2;%s\\033\\\\' 'Frontend'; python3 vitisTelemetryDash.py; sleep 500"
 fi
 
 cd ${curDir}
 
 if [ -z ${TMUX} ]; then
-    tmux attach-session -t vitis_cyclops_demo
+    tmux attach-session -t vitis_cyclops_demo_inst2
 else
-    echo "Use TMUX to switch to the new session: vitis_cyclops_demo"
+    echo "Use TMUX to switch to the new session: vitis_cyclops_demo_inst2"
 fi

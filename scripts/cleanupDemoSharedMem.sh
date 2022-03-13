@@ -20,15 +20,15 @@ fi
 
 cleaner=$buildDir/../sharedMemFIFOBench/build/cleanupShared
 
-vitisFromADCPipe="rx_demo_input_bundle_1"
-vitisFromRxPipe="rx_demo_output_bundle_1"
-vitisToTxPipe="tx_demo_input_bundle_1"
-vitisToDACPipe="tx_demo_output_bundle_1"
-TxFeedbkAppPipeName="txFeedbkAppLayer"
+vitisFromADCPipe="rx_demo_inst2_input_bundle_1"
+vitisFromRxPipe="rx_demo_inst2_output_bundle_1"
+vitisToTxPipe="tx_demo_inst2_input_bundle_1"
+vitisToDACPipe="tx_demo_inst2_output_bundle_1"
+TxFeedbkAppPipeName="txFeedbkAppLayer_inst2"
 
 pkill -f bladeRFToFIFO
-pkill -f benchmark_tx_demo_io_posix_shared_mem
-pkill -f benchmark_rx_demo_io_posix_shared_mem
+pkill -f benchmark_tx_demo_inst2_io_posix_shared_mem
+pkill -f benchmark_rx_demo_inst2_io_posix_shared_mem
 pkill -f cyclopsASCIILink
 pkill -f dummyAdcDacSharedMemFIFO
 

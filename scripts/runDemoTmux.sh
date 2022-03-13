@@ -15,7 +15,18 @@ else
     USE_DUMMY=$1
 fi
 
-appCPU=1
+#Instance 1
+# appCPU=1
+# uhdCPU=4
+# txCPU=5
+# rxCPU=6
+
+#Instance 2
+appCPU=33
+uhdCPU=36
+txCPU=37
+rxCPU=38
+
 TxTokens=10
 txdutycycle=0.05
 rxsubsampleperiod=100
@@ -25,10 +36,6 @@ vitisFromRxPipe="rx/output_bundle_1.pipe"
 
 vitisToTxPipe="tx/input_bundle_1.pipe"
 vitisToDACPipe="tx/output_bundle_1.pipe"
-
-uhdCPU=4
-txCPU=5
-rxCPU=6
 
 usrpArgs="addr=192.168.40.2"
 Freq=5800000000

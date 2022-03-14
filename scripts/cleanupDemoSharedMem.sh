@@ -26,11 +26,20 @@ vitisToTxPipe="tx_demo_input_bundle_1"
 vitisToDACPipe="tx_demo_output_bundle_1"
 TxFeedbkAppPipeName="txFeedbkAppLayer"
 
-pkill -f bladeRFToFIFO
-pkill -f benchmark_tx_demo_io_posix_shared_mem
-pkill -f benchmark_rx_demo_io_posix_shared_mem
-pkill -f cyclopsASCIILink
-pkill -f dummyAdcDacSharedMemFIFO
+parentPID=$1
+if [[ -z ${parentPID} ]]; then
+    pkill -f bladeRFToFIFO
+    pkill -f benchmark_tx_demo_io_posix_shared_mem
+    pkill -f benchmark_rx_demo_io_posix_shared_mem
+    pkill -f cyclopsASCIILink
+    pkill -f dummyAdcDacSharedMemFIFO
+else
+    pkill -P ${parentPID} -f bladeRFToFIFO
+    pkill -P ${parentPID} -f benchmark_tx_demo_io_posix_shared_mem
+    pkill -P ${parentPID} -f benchmark_rx_demo_io_posix_shared_mem
+    pkill -P ${parentPID} -f cyclopsASCIILink
+    pkill -P ${parentPID} -f dummyAdcDacSharedMemFIFO
+fi
 
 ${cleaner} ${vitisFromADCPipe}
 ${cleaner} ${vitisFromRxPipe}

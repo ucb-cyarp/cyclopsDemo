@@ -1,5 +1,5 @@
 # cyclopsDemo
-Support Files for Cyclops Vitis Demo
+Support Files for Cyclops Laminar Demo
 
 
  - [Install (Automatic)](#install-automatic)
@@ -13,6 +13,7 @@ Support Files for Cyclops Vitis Demo
    - [Stoping the Visualizer](#stoping-the-visualizer)
  - [Running the Demo and Collecting Results (Unattended)](#running-the-demo-and-collecting-results-unattended)
  - [Running Unattended Benchmark](#running-unattended-benchmark)
+ - [Docker](#docker)
  - [Appendix](#appendix)
    - [Install (Manual)](#install-manual)
    - [Creating a Build Directory from Scratch](#creating-a-build-directory-from-scratch)
@@ -53,14 +54,14 @@ If you are planning on using the web based telemetry visualizer, you will need t
 
 # Running the Demo (Interactive)
 1. Execute one of the following:
-    - To run with the USRP, use ```./runDemoTmux.sh```
-    - To run with the Dummy ADC/DAC, use ```./runDemoTmux.sh```
+    - To run with the USRP, use ```./runDemoTmuxSharedMem.sh```
+    - To run with the Dummy ADC/DAC, use ```./runDemoTmuxSharedMem.sh```
 2. Switch to the demo if you are launching from tmux by pressing Ctrl-b + ")"
 
 ## Cleanup the Demo (Interactive)
 1. Exit the demo using Ctrl-c, Ctrl-c
 2. If you were using tmux, reattach to your running session using ```tmux a```
-3. Cleanup the demo by running ```./cleanupDemo.sh; ./cleanupDemo.sh```
+3. Cleanup the demo by running ```./cleanupDemoSharedMem.sh; ./cleanupDemoSharedMem.sh```
 
 ## Collect Results (Interactive)
 It is advised for you to cleanup the interactive demo using the steps in [Cleanup the Demo (Interactive)](#cleanup-the-demo-interactive) before collecting results.
@@ -118,9 +119,21 @@ The suggested procedure for running the benchmarks on multi-core platforms:
 3. Reboot the system to bring it back to a known clean state
 4. Setup the platform (platform scripts assumed to be in `~/git/platformScripts`) and run the demo.  Replace path names with ones appropriate for your test
    ```
-   cd ~/git/platformScripts; sudo ./setup.sh; cd ~/git/cyclopsDemo/build; ./runDemoAndCollectResults.sh results/cyclopsDemoResults
+   cd ~/git/platformScripts; sudo ./setup.sh; cd ~/git/cyclopsDemo/build; ./runDemoAndCollectResultsSharedMemory.sh results/cyclopsDemoResults
    ```
 5. Results will be collected after 3 min and stored in the provided path
+
+# Docker
+If you do not have a dedicated multi-core machine to try the demo on but would like to see the demo functioning, running a Docker container may be a good option for you.  *Note that some of the optimizations such as thread pinning are omitted when targeting a docker container.*  The procedure below details how to build a docker container with the demo and run it.
+
+**Note: On systems with relativly few cores, the demo will run quite slowly.  This is partially because the Laminar generated DSP code polls on FIFOs and does not notify the OS that it is waiting.  This results in sub-optimal workload scheduling by the OS.**  Performance on a 12 Core AMD Ryzen 5900X with SMT enabled and Windows as the host OS yeilded impressive results but is still slower than what is possible with a dedicated many-core machine.
+
+## Building
+To build the containr, first make sure that all sub-modules have been cloned appropriatly by running `git submodule update --init`
+Then, cd into the `cyclopsDemo/Docker` directory and run `./buildContainer.sh`.  This will build a timestamped docker image named `cyclops_demo_local` and will set the `cyclops_demo_local:latest` tag to the newly created image.
+
+## Running
+To run the demo, cd into the `cyclopsDemo/Docker` directory and run `runContainer.sh`.  This will run the demo including the telemetry dashboard. Port forwarding for the telemetry will be setup to port 8000 on the host system.  Direct your web browser to [http://127.0.0.1:8000](http://127.0.0.1:8000) while the demo is running to view the dashboard.
 
 # Appendix
 ## Install (Manual)

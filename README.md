@@ -17,6 +17,7 @@ Support Files for Cyclops Laminar Demo
  - [Appendix](#appendix)
    - [Install (Manual)](#install-manual)
    - [Creating a Build Directory from Scratch](#creating-a-build-directory-from-scratch)
+ - [Citing This Software](#citing-this-software)
 
 # Install (Automatic)
 There is now a semi-automated way to build the demo and associated infrastructure if you are using the provided files in the `build` directory.  For information on performing these steps manually, see [Install (Manual)](#install-manual)
@@ -183,3 +184,17 @@ A build directory with an example design is provided for you.  To create one fro
    ln -s ../submodules/benchmarking/depends .
    ```
 6. Copy source .graphml files into build
+
+# Citing This Software:
+If you would like to reference this software, please cite Christopher Yarp's Ph.D. thesis.
+
+*At the time of writing, the GitHub CFF parser does not properly generate thesis citations.  Please see the bibtex entry below.*
+
+```bibtex
+@phdthesis{yarp_phd_2022,
+	title = {High Speed Software Radio on General Purpose CPUs},
+	school = {University of California, Berkeley},
+	author = {Yarp, Christopher},
+	year = {2022},
+}
+```

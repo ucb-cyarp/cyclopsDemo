@@ -31,6 +31,13 @@ There is now a semi-automated way to build the demo and associated infrastructur
    cd build
    ./build.sh
    ```
+   
+---
+**NOTE**
+
+When using Zenodo archives, sumbmodules are not included in the archive.  Please use the Dual Instance versions of cyclopsASCIILink: [10.5281/zenodo.6526104](https://doi.org/10.5281/zenodo.6526104)
+
+---
 
 Note that vitis will only be built if it has not already been built.  It will also be built with the compilers specified in `scripts/setCompilersToUse.sh`.  To re-build vitis, run:
 ```

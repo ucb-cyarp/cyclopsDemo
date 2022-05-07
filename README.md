@@ -1,5 +1,5 @@
 # cyclopsDemo
-Zenodo Single Instance DOI: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6526139.svg)](https://doi.org/10.5281/zenodo.6526139)
+Zenodo Dual Instance DOI: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6526132.svg)](https://doi.org/10.5281/zenodo.6526132)
 
 Support Files for Cyclops Laminar Demo 
 

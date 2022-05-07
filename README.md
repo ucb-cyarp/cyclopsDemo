@@ -1,6 +1,7 @@
 # cyclopsDemo
-Support Files for Cyclops Laminar Demo
+Zenodo Single Instance DOI: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6526139.svg)](https://doi.org/10.5281/zenodo.6526139)
 
+Support Files for Cyclops Laminar Demo
 
  - [Install (Automatic)](#install-automatic)
  - [Installing Dependencies for Visualization](#installing-dependencies-for-visualization)

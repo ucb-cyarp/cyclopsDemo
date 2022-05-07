@@ -36,7 +36,7 @@ There is now a semi-automated way to build the demo and associated infrastructur
 ---
 **NOTE**
 
-When using Zenodo archives, sumbmodules are not included in the archive.  Please use the Single Instance versions of cyclopsASCIILink: [10.5281/zenodo.6526107](https://doi.org/10.5281/zenodo.6526107)
+When using Zenodo archives, sumbmodules are not included in the archive.  Please use the Single Instance versions of cyclopsASCIILink: [10.5281/zenodo.6526155](https://doi.org/10.5281/zenodo.6526155)
 
 ---
 

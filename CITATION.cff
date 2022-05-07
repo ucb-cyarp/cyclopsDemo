@@ -30,7 +30,7 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.6526132
     description: Zenodo DOI for v1.0.0 Dual Instance
-doi: 10.5281/zenodo.6525791
+doi: 10.5281/zenodo.6526131
 license: BSD-3-Clause
 preferred-citation:
   type: thesis
